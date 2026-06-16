@@ -255,6 +255,17 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
 .reg-confirm-btn{background:var(--mint);color:white;border:none;padding:5px 13px;border-radius:50px;font-family:'Vazirmatn',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .2s;}
 .reg-confirm-btn:hover{opacity:.85;transform:scale(1.05);}
 .reg-empty{text-align:center;padding:40px;color:var(--g4);font-size:.9rem;}
+.reg-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;background:var(--g1);padding:6px;border-radius:12px;}
+.reg-tab{background:none;border:none;padding:8px 14px;border-radius:9px;font-family:'Vazirmatn',sans-serif;font-size:.8rem;font-weight:600;color:var(--g6);cursor:pointer;transition:all .2s;white-space:nowrap;}
+.reg-tab:hover{color:var(--blue);}
+.reg-tab.active{background:white;color:var(--blue);box-shadow:0 2px 8px rgba(108,74,182,.12);}
+.reg-count{display:inline-block;background:var(--red);color:white;font-size:.65rem;font-weight:800;padding:1px 7px;border-radius:50px;margin-right:4px;}
+.reg-count.confirmed{background:var(--mint);}
+.conf-card{background:var(--off);border:1.5px solid var(--g2);border-radius:12px;padding:14px 16px;margin-bottom:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.conf-card-head{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.conf-class-tag{background:rgba(54,201,176,.12);color:#1a8c6e;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:50px;}
+.conf-field strong{display:block;font-size:.72rem;color:var(--g4);font-weight:600;margin-bottom:2px;}
+.conf-field span{font-size:.83rem;color:var(--g8);font-weight:500;}
 /* Confirmed badge */
 .res-confirmed-badge{display:none;background:linear-gradient(135deg,#36C9B0,#2aa88e);color:white;border-radius:14px;padding:18px 20px;text-align:center;margin-bottom:16px;}
 .res-confirmed-badge .cb-ico{font-size:2rem;margin-bottom:6px;}
@@ -304,7 +315,7 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
     <div class="hstats">
       <div><div class="snum">۵۰۰+</div><div class="slbl">کودک خوشحال</div></div>
       <div><div class="snum">۵</div><div class="slbl">کلاس تخصصی</div></div>
-      <div><div class="snum">۵</div><div class="slbl">روز در هفته</div></div>
+      <div><div class="snum">۶</div><div class="slbl">روز در هفته</div></div>
     </div>
   </div>
 </section>
@@ -377,7 +388,7 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
           <div class="citem"><div class="cico2">📱</div><div><strong>شماره دوم (واتساپ / تلگرام)</strong><span>09188137985</span></div></div>
           <div class="citem"><div class="cico2">📲</div><div><strong>شماره سوم</strong><span>09931413922</span></div></div>
           <div class="citem"><div class="cico2">📸</div><div><strong>اینستاگرام</strong><span>@khane_bazi_nozhin</span></div></div>
-          <div class="citem"><div class="cico2">🕐</div><div><strong>ساعت کاری</strong><span>شنبه تا چهارشنبه — ۵ عصر تا ۸ شب</span></div></div>
+          <div class="citem"><div class="cico2">🕐</div><div><strong>ساعت کاری</strong><span>شنبه تا پنج‌شنبه — ۵ عصر تا ۸ شب (جمعه تعطیل)</span></div></div>
         </div>
       </div>
       <div class="cform fade">
@@ -523,7 +534,7 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
       </div>
       <div class="asec">
         <h3>⏰ ساعات کاری</h3>
-        <div class="afield"><label>ساعات کاری</label><input type="text" id="aWorkHours" placeholder="شنبه تا چهارشنبه — ۵ عصر تا ۸ شب"></div>
+        <div class="afield"><label>ساعات کاری</label><input type="text" id="aWorkHours" placeholder="شنبه تا پنج‌شنبه — ۵ عصر تا ۸ شب (جمعه تعطیل)"></div>
       </div>
       <div class="asec">
         <h3>📸 شبکه‌های اجتماعی</h3>
@@ -660,8 +671,13 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
 <div class="reg-overlay" id="regOverlay">
   <div class="reg-panel">
     <button class="reg-close" onclick="closeRegs()">✕</button>
-    <h2>📋 لیست ثبت‌نام‌ها</h2>
-    <p style="font-size:.8rem;color:var(--g6);margin-bottom:4px;">اطلاعات کامل رزروها — فقط ادمین</p>
+    <h2>📋 مدیریت ثبت‌نام‌ها</h2>
+    <p style="font-size:.8rem;color:var(--g6);margin-bottom:16px;">فقط ادمین — اطلاعات کامل رزروها</p>
+    <div class="reg-tabs">
+      <button class="reg-tab active" onclick="switchRegTab('pending',this)">⏳ در انتظار تایید <span id="pendingCount" class="reg-count"></span></button>
+      <button class="reg-tab" onclick="switchRegTab('confirmed',this)">✅ تایید‌شده‌ها <span id="confirmedCount" class="reg-count confirmed"></span></button>
+      <button class="reg-tab" onclick="switchRegTab('all',this)">📋 همه رزروها</button>
+    </div>
     <div id="regContent"></div>
   </div>
 </div>
@@ -672,16 +688,25 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
 // ===== STATE =====
 const S = {
   card: { num: '6219 8610 XXXX XXXX', owner: 'صاحب حساب' },
-  prices: { kollazh: 150000, rhythm: 150000, ballet: 180000, theater: 160000, acting: 160000, hourly: 200000 },
+  prices: { kollazh: 150000, rhythm: 150000, ballet: 180000, theater: 160000, acting: 160000, hourly: 200000, montessori_1: 0, montessori_2: 0 },
   hero: {
     t1:'فضایی امن و شاد', t2:'رشد کودک',
     desc:'در خانه بازی نوژین، محیطی گرم و آموزشی برای کودکان فراهم کرده‌ایم. کلاس‌های تخصصی، نگهداری ساعتی و سالن تولد — همه در یک مکان.',
-    s1n:'۵۰۰+', s1l:'کودک خوشحال', s2n:'۵', s2l:'کلاس تخصصی', s3n:'۵', s3l:'روز در هفته'
+    s1n:'۵۰۰+', s1l:'کودک خوشحال', s2n:'۵', s2l:'کلاس تخصصی', s3n:'۶', s3l:'روز در هفته'
   },
   sloganBar:'💡 والدین هوشمند = فرزند توانمند \u00a0|\u00a0 هر روز یک تجربه جدید، هر کودک یک ستاره در خانه بازی نوژین 💖',
-  workHours:'شنبه تا چهارشنبه — ۵ عصر تا ۸ شب',
+  workHours:'شنبه تا پنج‌شنبه — ۵ عصر تا ۸ شب (جمعه تعطیل)',
   social: { insta:'khane_bazi_nozhin', waNum:'989188137985' },
-  extraClasses: [],
+  extraClasses: [
+    {id:'montessori-sat-wed',n:'مونته‌سوری',e:'🌱',t:'ct3',a:'۲ تا ۶ سال',d:'شنبه و چهارشنبه',
+     sessions:[{time:'۵ تا ۶:۳۰',capKey:'montessori-sat-1'},{time:'۵ تا ۶:۳۰',capKey:'montessori-wed-1'}],
+     inst:'خانم یاوری',priceKey:'montessori_1',
+     desc:'با الهام از روش علمی دکتر ماریا مونته‌سوری، کودکان در محیطی آماده و هدفمند، آزادانه کشف می‌کنند و می‌آموزند. پژوهش‌های دانشگاهی نشان می‌دهد کودکان مونته‌سوری در مهارت‌های اجرایی، حافظه کوتاه‌مدت، درک اجتماعی و خلاقیت به‌طور چشمگیری از همسالان خود پیشی می‌گیرند — و این مزیت تا سال‌های آینده ادامه می‌یابد.'},
+    {id:'montessori-sun-tue',n:'مونته‌سوری',e:'🌱',t:'ct6',a:'۲ تا ۶ سال',d:'یک‌شنبه و سه‌شنبه',
+     sessions:[{time:'۵ تا ۶:۳۰',capKey:'montessori-sun-1'},{time:'۵ تا ۶:۳۰',capKey:'montessori-tue-1'}],
+     inst:'خانم خزاعی',priceKey:'montessori_2',
+     desc:'با الهام از روش علمی دکتر ماریا مونته‌سوری، کودکان در محیطی آماده و هدفمند، آزادانه کشف می‌کنند و می‌آموزند. پژوهش‌های دانشگاهی نشان می‌دهد کودکان مونته‌سوری در مهارت‌های اجرایی، حافظه کوتاه‌مدت، درک اجتماعی و خلاقیت به‌طور چشمگیری از همسالان خود پیشی می‌گیرند — و این مزیت تا سال‌های آینده ادامه می‌یابد.'},
+  ],
   caps: {
     'kollazh-1': { label: 'نقاشی کلاژی ۵-۶', cur: 6, max: 30 },
     'kollazh-2': { label: 'نقاشی کلاژی ۶-۷', cur: 4, max: 30 },
@@ -694,6 +719,10 @@ const S = {
     'theater-1': { label: 'نمایش خلاق ۵-۶', cur: 5, max: 30 },
     'theater-2': { label: 'نمایش خلاق ۶-۷', cur: 3, max: 30 },
     'acting-1': { label: 'بازیگری ۷-۸', cur: 2, max: 30 },
+    'montessori-sat-1': { label: 'مونته‌سوری شنبه ۵-۶:۳۰', cur: 0, max: 15 },
+    'montessori-wed-1': { label: 'مونته‌سوری چهارشنبه ۵-۶:۳۰', cur: 0, max: 15 },
+    'montessori-sun-1': { label: 'مونته‌سوری یک‌شنبه ۵-۶:۳۰', cur: 0, max: 15 },
+    'montessori-tue-1': { label: 'مونته‌سوری سه‌شنبه ۵-۶:۳۰', cur: 0, max: 15 },
   },
   phones: { p1: '09014188081', p2: '09188137985', p3: '09931413922' },
   addr: '۱۸ متری ذوالفقار، روبروی پارک گلها، انتهای کوچه گلستان',
@@ -766,24 +795,63 @@ function saveSchedOverrides(){
   });
 }
 
+let currentRegTab='pending';
+function switchRegTab(tab,el){
+  currentRegTab=tab;
+  document.querySelectorAll('.reg-tab').forEach(t=>t.classList.remove('active'));
+  if(el) el.classList.add('active');
+  renderRegContent();
+}
 function openRegs(){
   if(!adminAuthed){showAdminLogin(()=>openRegs());return;}
-  const cont=document.getElementById('regContent');
-  if(registrations.length===0){
-    cont.innerHTML='<div class="reg-empty">📭 هنوز هیچ ثبت‌نامی وجود ندارد</div>';
-  } else {
-    cont.innerHTML='<table class="reg-table"><thead><tr><th>#</th><th>نوع</th><th>نام والد</th><th>موبایل</th><th>نام کودک</th><th>سن</th><th>تاریخ</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>'+
-    registrations.map((r,i)=>'<tr><td>'+fa(i+1)+'</td><td>'+r.type+'</td><td>'+r.parent+'</td><td dir="ltr">'+r.phone+'</td><td>'+(r.child||'—')+'</td><td>'+r.age+'</td><td>'+(r.date||'—')+'</td><td><span class="reg-badge '+(r.confirmed?'confirmed':'pending')+'">'+(r.confirmed?'✅ تایید شده':'⏳ در انتظار')+'</span></td><td>'+(r.confirmed?'':'<button class="reg-confirm-btn" onclick="confirmReg(\''+ r.id +'\')">تایید</button>')+'</td></tr>').join('')+
-    '</tbody></table>';
-  }
+  currentRegTab='pending';
+  document.querySelectorAll('.reg-tab').forEach((t,i)=>t.classList.toggle('active',i===0));
+  renderRegContent();
   document.getElementById('regOverlay').classList.add('open');
+}
+function renderRegContent(){
+  const cont=document.getElementById('regContent');
+  const pending=registrations.filter(r=>!r.confirmed);
+  const confirmed=registrations.filter(r=>r.confirmed);
+  // update counts
+  const pc=document.getElementById('pendingCount');
+  const cc=document.getElementById('confirmedCount');
+  if(pc) pc.textContent=pending.length||'';
+  if(cc) cc.textContent=confirmed.length||'';
+  if(currentRegTab==='confirmed'){
+    if(confirmed.length===0){
+      cont.innerHTML='<div class="reg-empty">✅ هنوز رزروی تایید نشده است</div>';
+    } else {
+      cont.innerHTML=confirmed.map(r=>`
+        <div class="conf-card">
+          <div class="conf-card-head">
+            <span class="conf-class-tag">✅ ${r.type}</span>
+            <span style="font-size:.72rem;color:var(--g4)">${r.date||'—'}</span>
+          </div>
+          <div class="conf-field"><strong>نام والد</strong><span>${r.parent}</span></div>
+          <div class="conf-field"><strong>شماره موبایل</strong><span dir="ltr">${r.phone}</span></div>
+          <div class="conf-field"><strong>نام کودک</strong><span>${r.child||'—'}</span></div>
+          <div class="conf-field"><strong>سن</strong><span>${r.age}</span></div>
+          ${r.note?`<div class="conf-field" style="grid-column:1/-1"><strong>یادداشت</strong><span>${r.note}</span></div>`:''}
+        </div>`).join('');
+    }
+  } else {
+    const list=currentRegTab==='pending'?pending:registrations;
+    if(list.length===0){
+      cont.innerHTML='<div class="reg-empty">📭 '+(currentRegTab==='pending'?'هیچ رزروی در انتظار تایید نیست':'هنوز هیچ ثبت‌نامی وجود ندارد')+'</div>';
+    } else {
+      cont.innerHTML='<table class="reg-table"><thead><tr><th>#</th><th>کلاس / خدمت</th><th>نام والد</th><th>موبایل</th><th>نام کودک</th><th>تاریخ</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>'+
+      list.map((r,i)=>'<tr><td>'+fa(i+1)+'</td><td>'+r.type+'</td><td>'+r.parent+'</td><td dir="ltr">'+r.phone+'</td><td>'+(r.child||'—')+'</td><td>'+(r.date||'—')+'</td><td><span class="reg-badge '+(r.confirmed?'confirmed':'pending')+'">'+(r.confirmed?'✅ تایید شده':'⏳ در انتظار')+'</span></td><td>'+(r.confirmed?'<span style="font-size:.72rem;color:var(--g4)">تایید شده</span>':'<button class="reg-confirm-btn" onclick="confirmReg(\''+r.id+'\')">✅ تایید</button>')+'</td></tr>').join('')+
+      '</tbody></table>';
+    }
+  }
 }
 function closeRegs(){document.getElementById('regOverlay').classList.remove('open');}
 document.getElementById('regOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('regOverlay'))closeRegs();});
 function confirmReg(id){
   const reg=registrations.find(r=>r.id===id);
   if(reg){reg.confirmed=true;showToast('✅ رزرو '+reg.parent+' تایید شد!');}
-  openRegs();
+  renderRegContent();
   if(id===currentRegId)showConfirmedBadge();
 }
 function adminConfirmCurrent(){if(currentRegId)confirmReg(currentRegId);}
@@ -796,7 +864,7 @@ function showConfirmedBadge(){
 function renderClasses(){
   document.getElementById('classesGrid').innerHTML=getCD().map(c=>{
     const rawPrice=S.prices[c.priceKey];
-    const hasPrice=rawPrice&&Number(rawPrice)>0;
+    const hasPrice=rawPrice!==undefined&&rawPrice!==''&&Number(rawPrice)>0;
     const price=hasPrice?fmtPrice(rawPrice):'';
     const sesHtml=c.sessions.map(s=>{
       const cap=S.caps[s.capKey];const _ov=S.classOverrides[c.id];const _dispT=(_ov&&_ov.times&&_ov.times[c.sessions.indexOf(s)])||s.time;
