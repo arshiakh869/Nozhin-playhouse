@@ -979,11 +979,11 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
         </div>
         <div class="arow">
           <div class="afield"><label>مونته‌سوری ۱ (شنبه/چهارشنبه) — جلسه‌ای</label><input type="number" id="aM1Price" min="0" placeholder="0 = تماس بگیرید"></div>
-          <div class="afield"><label>مونته‌سوری ۱ — ماهیانه</label><input type="number" id="aM1PriceM" min="0" placeholder="0 = غیرفعال"></div>
+          <div class="afield"><label>مونته‌سوری ۱ — ترمی / ۱۲ جلسه</label><input type="number" id="aM1PriceM" min="0" placeholder="0 = غیرفعال"></div>
         </div>
         <div class="arow">
           <div class="afield"><label>مونته‌سوری ۲ (یک‌شنبه/سه‌شنبه) — جلسه‌ای</label><input type="number" id="aM2Price" min="0" placeholder="0 = تماس بگیرید"></div>
-          <div class="afield"><label>مونته‌سوری ۲ — ماهیانه</label><input type="number" id="aM2PriceM" min="0" placeholder="0 = غیرفعال"></div>
+          <div class="afield"><label>مونته‌سوری ۲ — ترمی / ۱۲ جلسه</label><input type="number" id="aM2PriceM" min="0" placeholder="0 = غیرفعال"></div>
         </div>
         <button class="admin-save" style="margin-top:8px" onclick="savePrices()">💾 ذخیره قیمت‌ها و کارت</button>
         <div id="pricesSaveStatus" style="font-size:.76rem;color:var(--g4);margin-top:6px"></div>
@@ -1076,8 +1076,8 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
 // ===== STATE =====
 const S = {
   card: { num: '6037 9915 6115 5155', owner: 'فتانه ترابی' },
-  prices: { kollazh: 150000, rhythm: 150000, ballet: 180000, theater: 160000, acting: 160000, hourly: 200000, montessori_1: 0, montessori_2: 0,
-    kollazh_m: 500000, rhythm_m: 500000, ballet_m: 600000, theater_m: 550000, acting_m: 550000, montessori_1_m: 0, montessori_2_m: 0 },
+  prices: { kollazh: 150000, rhythm: 150000, ballet: 180000, theater: 160000, acting: 160000, hourly: 200000, montessori_1: 400000, montessori_2: 400000,
+    kollazh_m: 500000, rhythm_m: 500000, ballet_m: 600000, theater_m: 550000, acting_m: 550000, montessori_1_m: 4800000, montessori_2_m: 4800000 },
   hero: {
     t1:'فضایی امن و شاد', t2:'رشد کودک',
     desc:'خانه بازی نوژین همدان — فضایی گرم، شاد و آموزشی برای کودکان شما. کلاس‌های تخصصی باله، نقاشی، ریتم، مونته‌سوری و نمایش خلاق. نگهداری ساعتی و سالن تولد رویایی — همه در یک مکان در همدان.',
@@ -1089,11 +1089,11 @@ const S = {
   extraClasses: [
     {id:'montessori-sat-wed',n:'مونته‌سوری',e:'🌱',t:'ct3',a:'۲ تا ۶ سال',d:'شنبه و چهارشنبه',
      sessions:[{time:'۵ تا ۶:۳۰',capKey:'montessori-sat-1'},{time:'۵ تا ۶:۳۰',capKey:'montessori-wed-1'}],
-     inst:'خانم یاوری',priceKey:'montessori_1',monthlyPriceKey:'montessori_1_m',
+     inst:'خانم یاوری',priceKey:'montessori_1',monthlyPriceKey:'montessori_1_m',termLabel:'ترمی (۱۲ جلسه)',
      desc:'با الهام از روش علمی دکتر ماریا مونته‌سوری، کودکان در محیطی آماده و هدفمند، آزادانه کشف می‌کنند و می‌آموزند. پژوهش‌های دانشگاهی نشان می‌دهد کودکان مونته‌سوری در مهارت‌های اجرایی، حافظه کوتاه‌مدت، درک اجتماعی و خلاقیت به‌طور چشمگیری از همسالان خود پیشی می‌گیرند — و این مزیت تا سال‌های آینده ادامه می‌یابد.'},
     {id:'montessori-sun-tue',n:'مونته‌سوری',e:'🌱',t:'ct6',a:'۲ تا ۶ سال',d:'یک‌شنبه و سه‌شنبه',
      sessions:[{time:'۵ تا ۶:۳۰',capKey:'montessori-sun-1'},{time:'۵ تا ۶:۳۰',capKey:'montessori-tue-1'}],
-     inst:'خانم خزاعی',priceKey:'montessori_2',monthlyPriceKey:'montessori_2_m',
+     inst:'خانم خزاعی',priceKey:'montessori_2',monthlyPriceKey:'montessori_2_m',termLabel:'ترمی (۱۲ جلسه)',
      desc:'با الهام از روش علمی دکتر ماریا مونته‌سوری، کودکان در محیطی آماده و هدفمند، آزادانه کشف می‌کنند و می‌آموزند. پژوهش‌های دانشگاهی نشان می‌دهد کودکان مونته‌سوری در مهارت‌های اجرایی، حافظه کوتاه‌مدت، درک اجتماعی و خلاقیت به‌طور چشمگیری از همسالان خود پیشی می‌گیرند — و این مزیت تا سال‌های آینده ادامه می‌یابد.'},
   ],
   caps: {
@@ -1359,15 +1359,16 @@ function renderClasses(){
         <span style="color:${isFull?'var(--red)':'var(--g6)'};font-weight:700">${isFull?'🔴 پر':fa(cap.cur)+'/'+fa(cap.max)}</span>
       </div>`;
     }).join('');
+    const monthlyLabel=c.termLabel||'ماهانه';
     const priceHtml=hasPrice
-      ?`<div class="cprice">${price} <small>تومان / جلسه</small></div>${hasMonthly?`<div class="cprice" style="font-size:.78rem;color:var(--g6);margin-top:2px">${monthlyPrice} <small>تومان / ماهانه</small></div>`:''}`
+      ?`<div class="cprice">${price} <small>تومان / جلسه</small></div>${hasMonthly?`<div class="cprice" style="font-size:.78rem;color:var(--g6);margin-top:2px">${monthlyPrice} <small>تومان / ${monthlyLabel}</small></div>`:''}`
       :`<div class="cprice" style="color:var(--blue);font-size:.74rem;font-weight:700;line-height:1.6">📞 برای هماهنگی و رزرو تماس بگیرید<br><span dir="ltr" style="font-size:.68rem;font-weight:500;color:var(--g6)">For booking, please contact us</span></div>`;
     const fullBadge=allFull?`<div style="background:var(--red);color:white;font-size:.7rem;font-weight:800;padding:3px 10px;border-radius:50px;display:inline-block;margin-bottom:8px">🔴 ظرفیت تکمیل است</div>`:'';
     const resBtn=allFull
       ?`<button class="btn-res" disabled style="opacity:.45;cursor:not-allowed;background:var(--g4)">ظرفیت پر</button>`
       :`<div style="display:flex;gap:6px;flex-wrap:wrap">
           <button class="btn-res" onclick="openModal('کلاس ${c.n} (جلسه‌ای)','${price}')">رزرو جلسه‌ای</button>
-          ${hasMonthly?`<button class="btn-res" style="background:var(--lb)" onclick="openModal('کلاس ${c.n} (ماهیانه)','${monthlyPrice}')">رزرو ماهیانه</button>`:''}
+          ${hasMonthly?`<button class="btn-res" style="background:var(--lb)" onclick="openModal('کلاس ${c.n} (${monthlyLabel})','${monthlyPrice}')">رزرو ${c.termLabel?'ترمی':'ماهیانه'}</button>`:''}
         </div>`;
     return `<div class="class-card fade">
       <div class="cctop ${c.t}"><span>${c.e}</span><span class="cage">${c.a}</span><span class="cday">${c.d}</span></div>
@@ -1407,13 +1408,14 @@ function renderPricing(){
     const hasP=rawP!==undefined&&rawP!==''&&Number(rawP)>0;
     const rawM=c.monthlyPriceKey?S.prices[c.monthlyPriceKey]:undefined;
     const hasM=rawM!==undefined&&rawM!==''&&Number(rawM)>0;
+    const mLabel=c.termLabel||'ماهانه';
     const priceDisp=hasP
-      ?`<div class="pamt">${fmtPrice(rawP)} <span>تومان</span></div><div class="pper">هر جلسه${hasM?` &nbsp;|&nbsp; ${fmtPrice(rawM)} تومان / ماهانه`:''}</div>`
+      ?`<div class="pamt">${fmtPrice(rawP)} <span>تومان</span></div><div class="pper">هر جلسه${hasM?` &nbsp;|&nbsp; ${fmtPrice(rawM)} تومان / ${mLabel}`:''}</div>`
       :`<div class="pamt" style="font-size:.95rem;color:var(--blue);line-height:1.6">📞 برای هماهنگی و رزرو تماس بگیرید</div><div class="pper" dir="ltr" style="font-size:.72rem;color:var(--g6)">For booking, please contact us</div>`;
     const btnsHtml=hasP
       ?`<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">
           <button class="pbtn" onclick="openModal('کلاس ${c.n} (جلسه‌ای)','${fmtPrice(rawP)}')">رزرو جلسه‌ای</button>
-          ${hasM?`<button class="pbtn" style="background:var(--lb)" onclick="openModal('کلاس ${c.n} (ماهیانه)','${fmtPrice(rawM)}')">رزرو ماهیانه</button>`:''}
+          ${hasM?`<button class="pbtn" style="background:var(--lb)" onclick="openModal('کلاس ${c.n} (${mLabel})','${fmtPrice(rawM)}')">رزرو ${c.termLabel?'ترمی':'ماهیانه'}</button>`:''}
         </div>`
       :`<button class="pbtn" onclick="openModal('کلاس ${c.n}','')">رزرو کلاس</button>`;
     return `<div class="pcard ${i===0?'feat':''} fade">${i===0?'<div class="flbl">⭐ پرطرفدار</div>':''}
@@ -1468,7 +1470,7 @@ function openModal(type,price){
   curT=type;curP=price;
   document.getElementById('mTitle').textContent='رزرو '+type;
   // Detect if this class is full (all sessions at max capacity)
-  const classNameMatch=type.replace(/^کلاس /,'').replace(/\s*\((جلسه‌ای|ماهیانه)\)$/,'');
+  const classNameMatch=type.replace(/^کلاس /,'').replace(/\s*\([^)]*\)\s*$/,'');
   const matchedClass=getCD().find(c=>c.n===classNameMatch);
   const classFull=matchedClass && matchedClass.sessions.every(s=>{ const cap=S.caps[s.capKey]; return cap && cap.cur>=cap.max; });
   window._curClassFull = classFull||false;
