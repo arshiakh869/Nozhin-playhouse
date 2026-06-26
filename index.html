@@ -616,6 +616,8 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
   <section class="section section-alt">
     <div class="sh fade"><div class="stag">آشنایی</div><h2 class="stitle">درباره کلاس‌های خانه بازی نوژین همدان</h2><p class="ssub">هر آنچه باید درباره کلاس‌های کودک در خانه بازی نوژین همدان بدانید</p></div>
     <div style="display:flex;flex-direction:column;gap:14px;" id="detailsGrid"></div>
+    <div class="sh fade" style="margin-top:60px"><div class="stag">قیمت‌گذاری</div><h2 class="stitle">قیمت کلاس‌ها و خدمات</h2><p class="ssub">قیمت هر کلاس به‌صورت جلسه‌ای و ماهیانه</p></div>
+    <div class="grid3" id="pricingGrid" style="margin-bottom:60px"></div>
     <div class="sh fade" style="margin-top:60px"><div class="stag">سوالات پرتکرار</div><h2 class="stitle">سوالات متداول درباره خانه بازی نوژین همدان</h2></div>
     <div style="display:flex;flex-direction:column;gap:12px;max-width:760px;margin:0 auto;">
       <details class="fade" style="background:white;border:1.5px solid var(--g2);border-radius:14px;padding:16px 20px;">
@@ -1741,6 +1743,7 @@ function savePrices(){
   const ok=S.save();
   const st=document.getElementById('pricesSaveStatus');
   if(st) st.textContent=ok?'✅ قیمت‌ها و اطلاعات کارت ذخیره شد':'⚠️ خطا در ذخیره';
+  closeAdmin();
   showToast('✅ قیمت‌ها و کارت ذخیره شد!');
 }
 
