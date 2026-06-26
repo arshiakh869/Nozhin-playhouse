@@ -119,8 +119,7 @@
 <!-- Firebase SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-  import { getStorage, ref as storageRef, uploadString, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+  import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCiMI3GqYJwCltdS3gvffEfAvPOHBolyUI",
@@ -134,10 +133,10 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
-  const storage = getStorage(app);
 
   // ─── Expose helpers to global scope ───
   window._FB = {
+    // ── Site config ──
     async loadSiteData() {
       try {
         const snap = await getDoc(doc(db, "site", "config"));
@@ -146,23 +145,51 @@
     },
     async saveSiteData(data) {
       try {
-        // Strip gallery srcs (stored separately in Storage)
-        const payload = { ...data, gallery: data.gallery.map(g => ({ id: g.id, caption: g.caption, url: g.url || '' })) };
+        // gallery images stored as base64 dataUrl directly in Firestore
+        const payload = { ...data, gallery: (data.gallery||[]).map(g => ({ id:g.id, caption:g.caption||'', url:g.url||g.src||'' })) };
         await setDoc(doc(db, "site", "config"), payload);
         return true;
       } catch(e) { console.error("FB save error:", e); return false; }
     },
+    // ── Gallery: store base64 directly in Firestore (no Storage CORS needed) ──
     async uploadGalleryImage(id, dataUrl) {
-      try {
-        const imgRef = storageRef(storage, `gallery/${id}.jpg`);
-        await uploadString(imgRef, dataUrl, 'data_url');
-        return await getDownloadURL(imgRef);
-      } catch(e) { console.error("FB upload error:", e); return null; }
+      // Just return the dataUrl — it will be saved inside site config
+      return dataUrl;
     },
     async deleteGalleryImage(id) {
+      // No Storage to clean up — images live in site config
+    },
+    // ── Registrations ──
+    async saveRegistration(reg) {
       try {
-        await deleteObject(storageRef(storage, `gallery/${id}.jpg`));
-      } catch(e) { /* silently ignore */ }
+        await setDoc(doc(db, "registrations", reg.id), reg);
+        return true;
+      } catch(e) { console.error("FB saveReg error:", e); return false; }
+    },
+    async loadRegistrations() {
+      try {
+        const q = query(collection(db, "registrations"), orderBy("ts", "desc"));
+        const snap = await getDocs(q);
+        return snap.docs.map(d => d.data());
+      } catch(e) {
+        // fallback without orderBy if index missing
+        try {
+          const snap = await getDocs(collection(db, "registrations"));
+          return snap.docs.map(d => d.data());
+        } catch(e2) { console.error("FB loadRegs error:", e2); return []; }
+      }
+    },
+    async updateRegistration(id, fields) {
+      try {
+        await updateDoc(doc(db, "registrations", id), fields);
+        return true;
+      } catch(e) { console.error("FB updateReg error:", e); return false; }
+    },
+    async deleteRegistration(id) {
+      try {
+        await deleteDoc(doc(db, "registrations", id));
+        return true;
+      } catch(e) { console.error("FB deleteReg error:", e); return false; }
     }
   };
 
@@ -847,6 +874,11 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
           <div class="afield"><label>نمایش خلاق (تومان)</label><input type="number" id="aTheater"></div>
           <div class="afield"><label>بازیگری (تومان)</label><input type="number" id="aActing"></div>
         </div>
+        <div class="arow">
+          <div class="afield"><label>مونته‌سوری ۱ (شنبه/چهارشنبه — تومان)</label><input type="number" id="aM1Price"></div>
+          <div class="afield"><label>مونته‌سوری ۲ (یک‌شنبه/سه‌شنبه — تومان)</label><input type="number" id="aM2Price"></div>
+        </div>
+        <div style="font-size:.74rem;color:var(--g4);margin-top:4px">صفر بگذارید تا پیام «برای هماهنگی تماس بگیرید» نمایش داده شود</div>
       </div>
       <div class="asec">
         <h3>📞 اطلاعات تماس</h3>
@@ -867,7 +899,12 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
         <h3>📸 افزودن عکس به گالری</h3>
         <div class="afield" style="margin-bottom:10px">
           <label>انتخاب عکس از گالری گوشی/کامپیوتر</label>
-          <input type="file" id="galFileInput" accept="image/*" multiple style="border:1.5px solid var(--g2);border-radius:10px;padding:10px 13px;width:100%;font-family:'Vazirmatn',sans-serif;font-size:.82rem;">
+          <input type="file" id="galFileInput" accept="image/*" multiple style="border:1.5px solid var(--g2);border-radius:10px;padding:10px 13px;width:100%;font-family:'Vazirmatn',sans-serif;font-size:.82rem;" onchange="previewGalImages(this)">
+        </div>
+        <!-- preview strip -->
+        <div id="galPreviewStrip" style="display:none;margin-bottom:12px;">
+          <div style="font-size:.78rem;font-weight:700;color:var(--blue);margin-bottom:8px">پیش‌نمایش عکس‌های انتخاب‌شده:</div>
+          <div id="galPreviewGrid" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
         </div>
         <div class="afield" style="margin-bottom:10px">
           <label>کپشن (اختیاری — برای همه عکس‌های انتخاب‌شده)</label>
@@ -1152,7 +1189,11 @@ function closeRegs(){document.getElementById('regOverlay').classList.remove('ope
 document.getElementById('regOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('regOverlay'))closeRegs();});
 function confirmReg(id){
   const reg=registrations.find(r=>r.id===id);
-  if(reg){reg.confirmed=true;showToast('✅ رزرو '+reg.parent+' تایید شد!');}
+  if(reg){
+    reg.confirmed=true;
+    showToast('✅ رزرو '+reg.parent+' تایید شد!');
+    if(window._FB) window._FB.updateRegistration(id, {confirmed:true});
+  }
   renderRegContent();
   if(id===currentRegId)showConfirmedBadge();
 }
@@ -1179,7 +1220,7 @@ function renderClasses(){
     }).join('');
     const priceHtml=hasPrice
       ?`<div class="cprice">${price} <small>تومان</small></div>`
-      :`<div class="cprice" style="color:var(--blue);font-size:.75rem;font-weight:700">📞 برای رزرو تماس بگیرید</div>`;
+      :`<div class="cprice" style="color:var(--blue);font-size:.74rem;font-weight:700;line-height:1.6">📞 برای هماهنگی و رزرو تماس بگیرید<br><span dir="ltr" style="font-size:.68rem;font-weight:500;color:var(--g6)">For booking, please contact us</span></div>`;
     return `<div class="class-card fade">
       <div class="cctop ${c.t}"><span>${c.e}</span><span class="cage">${c.a}</span><span class="cday">${c.d}</span></div>
       <div class="ccbody">
@@ -1212,20 +1253,29 @@ function renderDetails(){
 function renderPricing(){
   const CD=getCD();
   const uniq={};CD.forEach(c=>{if(!uniq[c.priceKey])uniq[c.priceKey]=c;});
-  const cards=Object.values(uniq).map((c,i)=>`
-    <div class="pcard ${i===0?'feat':''} fade">${i===0?'<div class="flbl">⭐ پرطرفدار</div>':''}
+  const cards=Object.values(uniq).map((c,i)=>{
+    const rawP=S.prices[c.priceKey];
+    const hasP=rawP!==undefined&&rawP!==''&&Number(rawP)>0;
+    const priceDisp=hasP
+      ?`<div class="pamt">${fmtPrice(rawP)} <span>تومان</span></div><div class="pper">هر جلسه</div>`
+      :`<div class="pamt" style="font-size:.95rem;color:var(--blue);line-height:1.6">📞 برای هماهنگی و رزرو تماس بگیرید</div><div class="pper" dir="ltr" style="font-size:.72rem;color:var(--g6)">For booking, please contact us</div>`;
+    const btnAction=hasP?`openModal('کلاس ${c.n}','${fmtPrice(rawP)}')`:`openModal('کلاس ${c.n}','')`;
+    return `<div class="pcard ${i===0?'feat':''} fade">${i===0?'<div class="flbl">⭐ پرطرفدار</div>':''}
       <h3>${c.e} ${c.n}</h3><p class="pdesc">${c.a}</p>
-      <div class="pamt">${fmtPrice(S.prices[c.priceKey])} <span>تومان</span></div>
-      <div class="pper">هر جلسه</div>
+      ${priceDisp}
       <ul class="pfeat"><li><span class="chk">✓</span>مربی متخصص</li><li><span class="chk">✓</span>حداکثر ۳۰ نفر</li><li><span class="chk">✓</span>مواد اولیه شامل</li></ul>
-      <button class="pbtn" onclick="openModal('کلاس ${c.n}','${fmtPrice(S.prices[c.priceKey])}')">رزرو کلاس</button>
-    </div>`).join('');
+      <button class="pbtn" onclick="${btnAction}">رزرو کلاس</button>
+    </div>`;}).join('');
+  const hourlyRaw=S.prices.hourly;
+  const hourlyHasP=hourlyRaw!==undefined&&hourlyRaw!==''&&Number(hourlyRaw)>0;
+  const hourlyPriceDisp=hourlyHasP
+    ?`<div class="pamt">${fmtPrice(hourlyRaw)} <span>تومان</span></div><div class="pper">هر ساعت</div>`
+    :`<div class="pamt" style="font-size:.95rem;color:var(--blue);line-height:1.6">📞 برای هماهنگی و رزرو تماس بگیرید</div><div class="pper" dir="ltr" style="font-size:.72rem;color:var(--g6)">For booking, please contact us</div>`;
   const hourlyCard=`<div class="pcard feat fade"><div class="flbl">👶 نگهداری</div>
     <h3>👶 نگهداری ساعتی</h3><p class="pdesc">برای والدین پرمشغله</p>
-    <div class="pamt">${fmtPrice(S.prices.hourly)} <span>تومان</span></div>
-    <div class="pper">هر ساعت</div>
+    ${hourlyPriceDisp}
     <ul class="pfeat"><li><span class="chk">✓</span>بازی‌های آموزشی</li><li><span class="chk">✓</span>میان‌وعده رایگان</li><li><span class="chk">✓</span>دوربین مداربسته</li></ul>
-    <button class="pbtn" onclick="openModal('نگهداری ساعتی','${fmtPrice(S.prices.hourly)}')">رزرو نگهداری</button>
+    <button class="pbtn" onclick="openModal('نگهداری ساعتی','${hourlyHasP?fmtPrice(hourlyRaw):''}')">رزرو نگهداری</button>
   </div>`;
   const bdCard=`<div class="pcard fade">
     <h3>🎂 سالن تولد</h3><p class="pdesc">جشن به‌یادماندنی</p>
@@ -1241,7 +1291,17 @@ function renderPricing(){
 // also update reserve section hourly price display
 function updateHourlyDisp(){
   const el=document.getElementById('hourlyPriceDisp');
-  if(el)el.textContent=fmtPrice(S.prices.hourly);
+  if(!el) return;
+  const raw=S.prices.hourly;
+  const hasP=raw!==undefined&&raw!==''&&Number(raw)>0;
+  if(hasP){
+    el.textContent=fmtPrice(raw);
+    const wrapper=el.closest('.sc-price');
+    if(wrapper) wrapper.innerHTML='از <strong id="hourlyPriceDisp">'+fmtPrice(raw)+'</strong> تومان / ساعت';
+  } else {
+    const wrapper=el.closest('.sc-price');
+    if(wrapper) wrapper.innerHTML='<span style="color:var(--blue);font-weight:700;font-size:.83rem;line-height:1.7">📞 برای هماهنگی و رزرو تماس بگیرید<br><span dir="ltr" style="font-size:.72rem;font-weight:400;color:var(--g6)">For booking, please contact us</span></span>';
+  }
 }
 
 // ===== MODAL =====
@@ -1298,7 +1358,10 @@ function goS2(){
   const regId='reg-'+Date.now();
   currentRegId=regId;
   const ch2=document.getElementById('fch').value;
-  registrations.push({id:regId,type:curT,parent:p,phone:ph,child:ch2,age:document.getElementById('fag').value,date:dt,note:document.getElementById('fnt').value,confirmed:false});
+  const newReg={id:regId,type:curT,parent:p,phone:ph,child:ch2,age:document.getElementById('fag').value,date:dt,note:document.getElementById('fnt').value,confirmed:false,ts:Date.now()};
+  registrations.unshift(newReg);
+  // Save to Firebase
+  if(window._FB) window._FB.saveRegistration(newReg);
   document.getElementById('adminConfirmWrap').style.display=adminAuthed?'block':'none';
   document.getElementById('confirmedBadge').style.display='none';
   document.getElementById('pendingFooter').style.display='block';
@@ -1368,6 +1431,9 @@ function _openAdminPanel(){
   document.getElementById('aBallet').value=S.prices.ballet;
   document.getElementById('aTheater').value=S.prices.theater;
   document.getElementById('aActing').value=S.prices.acting;
+  const m1el=document.getElementById('aM1Price'),m2el=document.getElementById('aM2Price');
+  if(m1el) m1el.value=S.prices.montessori_1||0;
+  if(m2el) m2el.value=S.prices.montessori_2||0;
   // phones
   document.getElementById('aPhone1').value=S.phones.p1;
   document.getElementById('aPhone2').value=S.phones.p2;
@@ -1402,12 +1468,16 @@ function _openAdminPanel(){
 function saveAdmin(){
   S.card.num=document.getElementById('aCardNum').value;
   S.card.owner=document.getElementById('aCardOwner').value;
-  S.prices.hourly = document.getElementById('aHourly').value !== '' ? +document.getElementById('aHourly').value : S.prices.hourly;
+  S.prices.hourly  = document.getElementById('aHourly').value  !== '' ? +document.getElementById('aHourly').value  : S.prices.hourly;
   S.prices.kollazh = document.getElementById('aKollazh').value !== '' ? +document.getElementById('aKollazh').value : S.prices.kollazh;
-  S.prices.rhythm = document.getElementById('aRhythm').value !== '' ? +document.getElementById('aRhythm').value : S.prices.rhythm;
-  S.prices.ballet = document.getElementById('aBallet').value !== '' ? +document.getElementById('aBallet').value : S.prices.ballet;
+  S.prices.rhythm  = document.getElementById('aRhythm').value  !== '' ? +document.getElementById('aRhythm').value  : S.prices.rhythm;
+  S.prices.ballet  = document.getElementById('aBallet').value  !== '' ? +document.getElementById('aBallet').value  : S.prices.ballet;
   S.prices.theater = document.getElementById('aTheater').value !== '' ? +document.getElementById('aTheater').value : S.prices.theater;
-  S.prices.acting = document.getElementById('aActing').value !== '' ? +document.getElementById('aActing').value : S.prices.acting;
+  S.prices.acting  = document.getElementById('aActing').value  !== '' ? +document.getElementById('aActing').value  : S.prices.acting;
+  // also update montessori prices from class edit (priceKey montessori_1/2)
+  const aM1=document.getElementById('aM1Price'),aM2=document.getElementById('aM2Price');
+  if(aM1&&aM1.value!=='') S.prices.montessori_1=+aM1.value;
+  if(aM2&&aM2.value!=='') S.prices.montessori_2=+aM2.value;
   S.phones.p1=document.getElementById('aPhone1').value;
   S.phones.p2=document.getElementById('aPhone2').value;
   S.phones.p3=document.getElementById('aPhone3').value;
@@ -1440,6 +1510,7 @@ function saveAdmin(){
   // re-render
   renderClasses();
   renderDetails();
+  renderPricing();
   updateHourlyDisp();
   applyHero();
   applySlogan();
@@ -1622,6 +1693,27 @@ function deleteClass(i){
 const GAL_MAX_DIM=1280; // max width/height for compressed images
 const GAL_JPEG_QUALITY=0.72;
 
+function previewGalImages(input){
+  const strip=document.getElementById('galPreviewStrip');
+  const grid=document.getElementById('galPreviewGrid');
+  if(!input.files||input.files.length===0){strip.style.display='none';grid.innerHTML='';return;}
+  strip.style.display='block';
+  grid.innerHTML='';
+  Array.from(input.files).forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const div=document.createElement('div');
+      div.style.cssText='position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;border:1.5px solid var(--g2);flex-shrink:0;';
+      const img=document.createElement('img');
+      img.src=e.target.result;
+      img.style.cssText='width:100%;height:100%;object-fit:cover;display:block;';
+      div.appendChild(img);
+      grid.appendChild(div);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 function compressImageFile(file){
   return new Promise((resolve,reject)=>{
     const reader=new FileReader();
@@ -1677,6 +1769,9 @@ async function addGalleryImages(){
   S.save();
   input.value='';
   document.getElementById('galCaption').value='';
+  // clear preview
+  document.getElementById('galPreviewStrip').style.display='none';
+  document.getElementById('galPreviewGrid').innerHTML='';
   statusEl.textContent=added?('✅ '+fa(added)+' عکس اضافه و در ابر ذخیره شد'+(failed?(' — ⚠️ '+fa(failed)+' عکس با خطا مواجه شد'):'')):'⚠️ هیچ عکسی اضافه نشد';
   buildGalAdminGrid();
   renderGallery();
@@ -1818,6 +1913,18 @@ function _applyFirebaseData(){
       }catch(e){console.error(e);}
     }
   });
+  // Load registrations from Firebase
+  if(window._FB){
+    window._FB.loadRegistrations().then(regs=>{
+      if(regs && regs.length>0){
+        registrations.length=0;
+        regs.forEach(r=>registrations.push(r));
+        // sort by ts desc
+        registrations.sort((a,b)=>(b.ts||0)-(a.ts||0));
+        if(typeof renderRegContent==='function') renderRegContent();
+      }
+    });
+  }
 }
 if(window._fbReady){ _applyFirebaseData(); }
 else { document.addEventListener('fbReady', _applyFirebaseData, {once:true}); }
