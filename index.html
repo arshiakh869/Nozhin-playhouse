@@ -164,7 +164,7 @@
 <!-- Firebase SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, updateDoc, deleteDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCiMI3GqYJwCltdS3gvffEfAvPOHBolyUI",
@@ -185,24 +185,42 @@
     async loadSiteData() {
       try {
         const snap = await getDoc(doc(db, "site", "config"));
-        return snap.exists() ? snap.data() : null;
+        if(!snap.exists()) return null;
+        const data = snap.data();
+        // Load gallery from separate collection
+        try {
+          const gSnap = await getDocs(collection(db, "gallery"));
+          data.gallery = gSnap.docs.map(d => d.data()).sort((a,b)=>(a.ts||0)-(b.ts||0));
+        } catch(e) { data.gallery = data.gallery || []; }
+        return data;
       } catch(e) { console.error("FB load error:", e); return null; }
     },
     async saveSiteData(data) {
       try {
-        // gallery images stored as base64 dataUrl directly in Firestore
-        const payload = { ...data, gallery: (data.gallery||[]).map(g => ({ id:g.id, caption:g.caption||'', url:g.url||g.src||'' })) };
-        await setDoc(doc(db, "site", "config"), payload);
+        // Save config WITHOUT gallery (gallery saved separately to avoid 1MB limit)
+        const { gallery, ...configOnly } = data;
+        await setDoc(doc(db, "site", "config"), configOnly);
         return true;
       } catch(e) { console.error("FB save error:", e); return false; }
     },
-    // ── Gallery: store base64 directly in Firestore (no Storage CORS needed) ──
+    // ── Gallery: each image is a separate Firestore doc ──
     async uploadGalleryImage(id, dataUrl) {
-      // Just return the dataUrl — it will be saved inside site config
-      return dataUrl;
+      try {
+        await setDoc(doc(db, "gallery", id), { id, url: dataUrl, ts: Date.now() });
+        return dataUrl;
+      } catch(e) { console.error("FB gallery upload error:", e); return dataUrl; }
     },
     async deleteGalleryImage(id) {
-      // No Storage to clean up — images live in site config
+      try { await deleteDoc(doc(db, "gallery", id)); } catch(e) {}
+    },
+    async saveGalleryCaption(id, caption) {
+      try { await updateDoc(doc(db, "gallery", id), { caption }); } catch(e) {}
+    },
+    // ── Real-time listener: re-render when config changes ──
+    listenSiteConfig(callback) {
+      return onSnapshot(doc(db, "site", "config"), snap => {
+        if(snap.exists()) callback(snap.data());
+      });
     },
     // ── Registrations ──
     async saveRegistration(reg) {
@@ -1101,23 +1119,28 @@ const S = {
   gallery: [],
   STORAGE_KEY: 'nozhinSiteData_v1',
   save(){
-    // Save to Firebase (async, non-blocking) + localStorage as backup
     const data={
       card:this.card, prices:this.prices, hero:this.hero, sloganBar:this.sloganBar,
       workHours:this.workHours, social:this.social, extraClasses:this.extraClasses,
       caps:this.caps, phones:this.phones, addr:this.addr, classOverrides:this.classOverrides,
-      gallery:this.gallery, adminPass:(typeof ADMIN_PASS_VAR!=='undefined'?ADMIN_PASS_VAR:undefined)
+      adminPass:(typeof ADMIN_PASS_VAR!=='undefined'?ADMIN_PASS_VAR:undefined)
+      // NOTE: gallery NOT included here — saved separately per-image
     };
     // Firebase save (primary)
     if(window._FB){
       window._FB.saveSiteData(data).then(ok=>{
-        if(!ok && typeof showToast==='function') showToast('⚠️ ذخیره ابری با خطا مواجه شد');
+        if(ok){
+          if(typeof showToast==='function') showToast('✅ تغییرات در سرور ذخیره شد');
+        } else {
+          if(typeof showToast==='function') showToast('❌ خطا در ذخیره — اینترنت را بررسی کنید');
+        }
       });
+    } else {
+      if(typeof showToast==='function') showToast('⚠️ اتصال به Firebase برقرار نیست');
     }
     // localStorage backup
     try{
-      const backupData = { ...data, gallery: data.gallery.map(g=>({id:g.id,caption:g.caption,url:g.url||''})) };
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(backupData));
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify({...data, gallery:[]}));
     }catch(e){ console.warn('localStorage backup failed:', e); }
     return true;
   },
@@ -1159,7 +1182,7 @@ const S = {
     if(typeof data.addr==='string') this.addr=data.addr;
     if(data.classOverrides) Object.assign(this.classOverrides, data.classOverrides);
     if(Array.isArray(data.gallery)) this.gallery=data.gallery;
-    if(data.adminPass && typeof ADMIN_PASS_VAR!=='undefined') ADMIN_PASS_VAR=data.adminPass;
+    if(data.adminPass && typeof ADMIN_PASS_VAR!=='undefined') { try{ ADMIN_PASS_VAR=data.adminPass; }catch(e){} }
   }
 };
 
@@ -2049,7 +2072,7 @@ async function addGalleryImages(){
       failed++;
     }
   }
-  S.save();
+  // No S.save() needed — each image saved individually to gallery collection
   input.value='';
   document.getElementById('galCaption').value='';
   // clear preview
@@ -2065,8 +2088,6 @@ function deleteGalleryImage(id){
   const idx=S.gallery.findIndex(g=>g.id===id);
   if(idx===-1) return;
   S.gallery.splice(idx,1);
-  S.save();
-  // Delete from Firebase Storage too
   if(window._FB) window._FB.deleteGalleryImage(id);
   buildGalAdminGrid();
   renderGallery();
@@ -2172,37 +2193,52 @@ try{
   if(typeof obs==='function') obs();
 }catch(e){console.error(e);}
 
-// Load from Firebase (authoritative source) - runs after page init
+// Load from Firebase + subscribe to real-time changes
 function _applyFirebaseData(){
-  S.loadFromFirebase().then(loaded=>{
-    if(loaded){
-      // Re-render everything with fresh Firebase data
-      try{
-        if(typeof renderClasses==='function') renderClasses();
-        if(typeof renderDetails==='function') renderDetails();
-        if(typeof renderPricing==='function') renderPricing();
-        if(typeof updateHourlyDisp==='function') updateHourlyDisp();
-        if(typeof applyHero==='function') applyHero();
-        if(typeof applyStats==='function') applyStats();
-        if(typeof applySlogan==='function') applySlogan();
-        if(typeof applyWorkHours==='function') applyWorkHours();
-        if(typeof applySocial==='function') applySocial();
-        if(typeof applyContactInfo==='function') applyContactInfo();
-        if(typeof renderGallery==='function') renderGallery();
-        if(typeof obs==='function') obs();
-        // Sync backup localStorage
-        const backupData={card:S.card,prices:S.prices,hero:S.hero,sloganBar:S.sloganBar,workHours:S.workHours,social:S.social,extraClasses:S.extraClasses,caps:S.caps,phones:S.phones,addr:S.addr,classOverrides:S.classOverrides,gallery:S.gallery.map(g=>({id:g.id,caption:g.caption,url:g.url||''}))};
-        try{localStorage.setItem(S.STORAGE_KEY,JSON.stringify(backupData));}catch(e){}
-      }catch(e){console.error(e);}
-    }
-  });
+  function rerender(){
+    try{
+      if(typeof renderClasses==='function') renderClasses();
+      if(typeof renderDetails==='function') renderDetails();
+      if(typeof renderPricing==='function') renderPricing();
+      if(typeof updateHourlyDisp==='function') updateHourlyDisp();
+      if(typeof applyHero==='function') applyHero();
+      if(typeof applyStats==='function') applyStats();
+      if(typeof applySlogan==='function') applySlogan();
+      if(typeof applyWorkHours==='function') applyWorkHours();
+      if(typeof applySocial==='function') applySocial();
+      if(typeof applyContactInfo==='function') applyContactInfo();
+      if(typeof renderGallery==='function') renderGallery();
+      if(typeof obs==='function') obs();
+    }catch(e){console.error('rerender error:',e);}
+  }
+
+  // Real-time listener — fires immediately on load AND on every admin save
+  if(window._FB && window._FB.listenSiteConfig){
+    window._FB.listenSiteConfig(data => {
+      // Also load gallery from separate collection
+      if(window._FB.loadSiteData){
+        window._FB.loadSiteData().then(fullData => {
+          if(fullData) S._applyData(fullData);
+          else S._applyData(data);
+          rerender();
+          try{ localStorage.setItem(S.STORAGE_KEY, JSON.stringify({...data, gallery:[]})); }catch(e){}
+        });
+      } else {
+        S._applyData(data);
+        rerender();
+      }
+    });
+  } else {
+    // Fallback: one-time load
+    S.loadFromFirebase().then(loaded => { if(loaded) rerender(); });
+  }
+
   // Load registrations from Firebase
   if(window._FB){
     window._FB.loadRegistrations().then(regs=>{
       if(regs && regs.length>0){
         registrations.length=0;
         regs.forEach(r=>registrations.push(r));
-        // sort by ts desc
         registrations.sort((a,b)=>(b.ts||0)-(a.ts||0));
         if(typeof renderRegContent==='function') renderRegContent();
       }
@@ -2213,14 +2249,8 @@ if(window._fbReady){ _applyFirebaseData(); }
 else { document.addEventListener('fbReady', _applyFirebaseData, {once:true}); }
 
 
-document.addEventListener('change',function(e){
-  try{
-    if(typeof S!=='undefined' && typeof S.save==='function'){
-      clearTimeout(window.__nzSaveTimer);
-      window.__nzSaveTimer=setTimeout(()=>S.save(),300);
-    }
-  }catch(err){}
-});
+// Auto-save disabled — explicit save buttons used instead
+
 
 </script>
 </body>
