@@ -748,6 +748,10 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
           </div>
         </div>
       </div>
+      <div id="fsessWrap" class="fg" style="display:none">
+        <label>ساعت جلسه</label>
+        <select class="fc" id="fsess"></select>
+      </div>
       <div id="trw" style="display:none">
         <div class="trwrap">
           <div class="fg"><label>از ساعت</label><select class="fc" id="ffr"><option>۸:۰۰</option><option>۹:۰۰</option><option>۱۰:۰۰</option><option>۱۱:۰۰</option><option>۱۲:۰۰</option><option>۱۳:۰۰</option><option>۱۴:۰۰</option><option>۱۵:۰۰</option><option>۱۶:۰۰</option><option>۱۷:۰۰</option><option>۱۸:۰۰</option><option>۱۹:۰۰</option></select></div>
@@ -887,7 +891,10 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
           <div class="afield"><label>نام مربی</label><input type="text" id="ncInst" placeholder="مثلاً: خانم احمدی"></div>
         </div>
         <div class="afield" style="margin-bottom:10px"><label>توضیحات کلاس</label><textarea id="ncDesc" rows="3" style="border:1.5px solid var(--g2);border-radius:10px;padding:10px 13px;font-family:'Vazirmatn',sans-serif;font-size:.85rem;width:100%;resize:vertical;outline:none;" placeholder="توضیح کوتاه درباره این کلاس..."></textarea></div>
-        <div class="afield" style="margin-bottom:10px"><label>قیمت (تومان)</label><input type="number" id="ncPrice" placeholder="150000"></div>
+        <div class="arow">
+          <div class="afield"><label>قیمت جلسه‌ای (تومان)</label><input type="number" id="ncPrice" placeholder="150000"></div>
+          <div class="afield"><label>قیمت ماهیانه (تومان — اختیاری)</label><input type="number" id="ncPriceM" placeholder="0 = غیرفعال"></div>
+        </div>
         <div style="background:var(--g1);border-radius:12px;padding:14px;margin-bottom:12px;">
           <div style="font-size:.8rem;font-weight:700;color:var(--blue);margin-bottom:10px">جلسات (ساعت‌ها)</div>
           <div id="ncSessionsWrap"></div>
@@ -926,22 +933,37 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
       </div>
       <div class="asec">
         <h3>💰 قیمت خدمات</h3>
-        <p style="font-size:.76rem;color:var(--g4);margin-bottom:14px;line-height:1.7">صفر بگذارید تا پیام «📞 برای هماهنگی و رزرو تماس بگیرید» نمایش داده شود</p>
+        <p style="font-size:.76rem;color:var(--g4);margin-bottom:14px;line-height:1.7">صفر بگذارید تا پیام «📞 برای هماهنگی و رزرو تماس بگیرید» نمایش داده شود. قیمت ماهیانه را خالی/صفر بگذارید تا دکمه «رزرو ماهیانه» نمایش داده نشود.</p>
         <div class="arow">
           <div class="afield"><label>نگهداری ساعتی (تومان)</label><input type="number" id="aHourly" min="0" placeholder="0 = تماس بگیرید"></div>
-          <div class="afield"><label>کلاس نقاشی کلاژی (تومان)</label><input type="number" id="aKollazh" min="0" placeholder="0 = تماس بگیرید"></div>
         </div>
         <div class="arow">
-          <div class="afield"><label>کلاس ریتم و گیم (تومان)</label><input type="number" id="aRhythm" min="0" placeholder="0 = تماس بگیرید"></div>
-          <div class="afield"><label>کلاس باله (تومان)</label><input type="number" id="aBallet" min="0" placeholder="0 = تماس بگیرید"></div>
+          <div class="afield"><label>کلاس نقاشی کلاژی — جلسه‌ای (تومان)</label><input type="number" id="aKollazh" min="0" placeholder="0 = تماس بگیرید"></div>
+          <div class="afield"><label>کلاس نقاشی کلاژی — ماهیانه (تومان)</label><input type="number" id="aKollazhM" min="0" placeholder="0 = غیرفعال"></div>
         </div>
         <div class="arow">
-          <div class="afield"><label>نمایش خلاق (تومان)</label><input type="number" id="aTheater" min="0" placeholder="0 = تماس بگیرید"></div>
-          <div class="afield"><label>بازیگری (تومان)</label><input type="number" id="aActing" min="0" placeholder="0 = تماس بگیرید"></div>
+          <div class="afield"><label>کلاس ریتم و گیم — جلسه‌ای (تومان)</label><input type="number" id="aRhythm" min="0" placeholder="0 = تماس بگیرید"></div>
+          <div class="afield"><label>کلاس ریتم و گیم — ماهیانه (تومان)</label><input type="number" id="aRhythmM" min="0" placeholder="0 = غیرفعال"></div>
         </div>
         <div class="arow">
-          <div class="afield"><label>مونته‌سوری ۱ (شنبه / چهارشنبه)</label><input type="number" id="aM1Price" min="0" placeholder="0 = تماس بگیرید"></div>
-          <div class="afield"><label>مونته‌سوری ۲ (یک‌شنبه / سه‌شنبه)</label><input type="number" id="aM2Price" min="0" placeholder="0 = تماس بگیرید"></div>
+          <div class="afield"><label>کلاس باله — جلسه‌ای (تومان)</label><input type="number" id="aBallet" min="0" placeholder="0 = تماس بگیرید"></div>
+          <div class="afield"><label>کلاس باله — ماهیانه (تومان)</label><input type="number" id="aBalletM" min="0" placeholder="0 = غیرفعال"></div>
+        </div>
+        <div class="arow">
+          <div class="afield"><label>نمایش خلاق — جلسه‌ای (تومان)</label><input type="number" id="aTheater" min="0" placeholder="0 = تماس بگیرید"></div>
+          <div class="afield"><label>نمایش خلاق — ماهیانه (تومان)</label><input type="number" id="aTheaterM" min="0" placeholder="0 = غیرفعال"></div>
+        </div>
+        <div class="arow">
+          <div class="afield"><label>بازیگری — جلسه‌ای (تومان)</label><input type="number" id="aActing" min="0" placeholder="0 = تماس بگیرید"></div>
+          <div class="afield"><label>بازیگری — ماهیانه (تومان)</label><input type="number" id="aActingM" min="0" placeholder="0 = غیرفعال"></div>
+        </div>
+        <div class="arow">
+          <div class="afield"><label>مونته‌سوری ۱ (شنبه/چهارشنبه) — جلسه‌ای</label><input type="number" id="aM1Price" min="0" placeholder="0 = تماس بگیرید"></div>
+          <div class="afield"><label>مونته‌سوری ۱ — ماهیانه</label><input type="number" id="aM1PriceM" min="0" placeholder="0 = غیرفعال"></div>
+        </div>
+        <div class="arow">
+          <div class="afield"><label>مونته‌سوری ۲ (یک‌شنبه/سه‌شنبه) — جلسه‌ای</label><input type="number" id="aM2Price" min="0" placeholder="0 = تماس بگیرید"></div>
+          <div class="afield"><label>مونته‌سوری ۲ — ماهیانه</label><input type="number" id="aM2PriceM" min="0" placeholder="0 = غیرفعال"></div>
         </div>
         <button class="admin-save" style="margin-top:8px" onclick="savePrices()">💾 ذخیره قیمت‌ها و کارت</button>
         <div id="pricesSaveStatus" style="font-size:.76rem;color:var(--g4);margin-top:6px"></div>
@@ -1034,7 +1056,8 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
 // ===== STATE =====
 const S = {
   card: { num: '6037 9915 6115 5155', owner: 'فتانه ترابی' },
-  prices: { kollazh: 150000, rhythm: 150000, ballet: 180000, theater: 160000, acting: 160000, hourly: 200000, montessori_1: 0, montessori_2: 0 },
+  prices: { kollazh: 150000, rhythm: 150000, ballet: 180000, theater: 160000, acting: 160000, hourly: 200000, montessori_1: 0, montessori_2: 0,
+    kollazh_m: 500000, rhythm_m: 500000, ballet_m: 600000, theater_m: 550000, acting_m: 550000, montessori_1_m: 0, montessori_2_m: 0 },
   hero: {
     t1:'فضایی امن و شاد', t2:'رشد کودک',
     desc:'خانه بازی نوژین همدان — فضایی گرم، شاد و آموزشی برای کودکان شما. کلاس‌های تخصصی باله، نقاشی، ریتم، مونته‌سوری و نمایش خلاق. نگهداری ساعتی و سالن تولد رویایی — همه در یک مکان در همدان.',
@@ -1046,11 +1069,11 @@ const S = {
   extraClasses: [
     {id:'montessori-sat-wed',n:'مونته‌سوری',e:'🌱',t:'ct3',a:'۲ تا ۶ سال',d:'شنبه و چهارشنبه',
      sessions:[{time:'۵ تا ۶:۳۰',capKey:'montessori-sat-1'},{time:'۵ تا ۶:۳۰',capKey:'montessori-wed-1'}],
-     inst:'خانم یاوری',priceKey:'montessori_1',
+     inst:'خانم یاوری',priceKey:'montessori_1',monthlyPriceKey:'montessori_1_m',
      desc:'با الهام از روش علمی دکتر ماریا مونته‌سوری، کودکان در محیطی آماده و هدفمند، آزادانه کشف می‌کنند و می‌آموزند. پژوهش‌های دانشگاهی نشان می‌دهد کودکان مونته‌سوری در مهارت‌های اجرایی، حافظه کوتاه‌مدت، درک اجتماعی و خلاقیت به‌طور چشمگیری از همسالان خود پیشی می‌گیرند — و این مزیت تا سال‌های آینده ادامه می‌یابد.'},
     {id:'montessori-sun-tue',n:'مونته‌سوری',e:'🌱',t:'ct6',a:'۲ تا ۶ سال',d:'یک‌شنبه و سه‌شنبه',
      sessions:[{time:'۵ تا ۶:۳۰',capKey:'montessori-sun-1'},{time:'۵ تا ۶:۳۰',capKey:'montessori-tue-1'}],
-     inst:'خانم خزاعی',priceKey:'montessori_2',
+     inst:'خانم خزاعی',priceKey:'montessori_2',monthlyPriceKey:'montessori_2_m',
      desc:'با الهام از روش علمی دکتر ماریا مونته‌سوری، کودکان در محیطی آماده و هدفمند، آزادانه کشف می‌کنند و می‌آموزند. پژوهش‌های دانشگاهی نشان می‌دهد کودکان مونته‌سوری در مهارت‌های اجرایی، حافظه کوتاه‌مدت، درک اجتماعی و خلاقیت به‌طور چشمگیری از همسالان خود پیشی می‌گیرند — و این مزیت تا سال‌های آینده ادامه می‌یابد.'},
   ],
   caps: {
@@ -1146,27 +1169,27 @@ function getPriceStr(key){return fmtPrice(S.prices[key]);}
 function getCD(){return[
   {id:'kollazh',n:'نقاشی کلاژی',e:'🎨',t:'ct1',a:'۳ تا ۸ سال',d:'شنبه',sessions:[
     {time:'۵ تا ۶',capKey:'kollazh-1'},{time:'۶ تا ۷',capKey:'kollazh-2'}],
-    inst:'خانم قربانی چم',priceKey:'kollazh',
+    inst:'خانم قربانی چم',priceKey:'kollazh',monthlyPriceKey:'kollazh_m',
     desc:'کودکان با رنگ‌های شاد و مواد متنوع خلاقیت خود را شکوفا می‌کنند. ترکیبی از رنگ، کاغذ و مواد طبیعی که تخیل کودک را پرواز می‌دهد.'},
   {id:'rhythm-mon',n:'ریتم و گیم',e:'🎵',t:'ct2',a:'۲.۵ تا ۷ سال',d:'یک‌شنبه',sessions:[
     {time:'۵ تا ۶ (۲.۵-۴ سال)',capKey:'rhythm-mon-1'},{time:'۶ تا ۷ (۴-۷ سال)',capKey:'rhythm-mon-2'}],
-    inst:'خانم اشبه',priceKey:'rhythm',
+    inst:'خانم اشبه',priceKey:'rhythm',monthlyPriceKey:'rhythm_m',
     desc:'دنیایی شاد از موسیقی، حرکت و بازی. کودکان با آهنگ‌های کودکانه حس ریتم را درک و هماهنگی حرکتی را تجربه می‌کنند.'},
   {id:'ballet',n:'باله',e:'🩰',t:'ct3',a:'۳ تا ۹ سال',d:'دوشنبه',sessions:[
     {time:'۴:۳۰ تا ۵:۳۰',capKey:'ballet-1'},{time:'۶:۳۰',capKey:'ballet-2'}],
-    inst:'خانم موسوی',priceKey:'ballet',
+    inst:'خانم موسوی',priceKey:'ballet',monthlyPriceKey:'ballet_m',
     desc:'کودکان با ظرافت و زیبایی حرکت آشنا می‌شوند. هر گام اعتماد به نفس می‌سازد و انعطاف‌پذیری بدن را بالا می‌برد.'},
   {id:'rhythm-wed',n:'ریتم و گیم + بازی شادی',e:'😊',t:'ct4',a:'۱ تا ۴ سال',d:'سه‌شنبه',sessions:[
     {time:'۵ تا ۶ (۲.۵-۴ سال)',capKey:'rhythm-wed-1'},{time:'۶ تا ۷ (۱-۲ سال)',capKey:'rhythm-wed-2'}],
-    inst:'خانم اشبه',priceKey:'rhythm',
+    inst:'خانم اشبه',priceKey:'rhythm',monthlyPriceKey:'rhythm_m',
     desc:'ترکیبی شاد از ریتم موسیقی و بازی‌های گروهی. در بازی شادی کوچک‌ترین بچه‌ها با دنیای اصوات و تعامل اجتماعی آشنا می‌شوند.'},
   {id:'theater',n:'نمایش خلاق',e:'🎭',t:'ct5',a:'۳ تا ۸ سال',d:'چهارشنبه',sessions:[
     {time:'۵ تا ۶',capKey:'theater-1'},{time:'۶ تا ۷',capKey:'theater-2'}],
-    inst:'آقای ترابی',priceKey:'theater',
+    inst:'آقای ترابی',priceKey:'theater',monthlyPriceKey:'theater_m',
     desc:'داستان‌سرایی و تصویرسازی ذهنی که بیان وجودی و اعتماد به نفس کودک را می‌سازد.'},
   {id:'acting',n:'بازیگری',e:'🎬',t:'ct6',a:'۶ تا ۱۳ سال',d:'چهارشنبه',sessions:[
     {time:'۷ تا ۸',capKey:'acting-1'}],
-    inst:'آقای ترابی',priceKey:'acting',
+    inst:'آقای ترابی',priceKey:'acting',monthlyPriceKey:'acting_m',
     desc:'کلاس بازیگری برای نوجوانان با تکنیک‌های پیشرفته‌تر صحنه. تقویت بیان، حضور ذهن و هنر اجرا.'},
   ...S.extraClasses];}
 
@@ -1241,6 +1264,7 @@ function renderRegContent(){
           <div class="conf-field"><strong>شماره موبایل</strong><span dir="ltr">${r.phone}</span></div>
           <div class="conf-field"><strong>نام کودک</strong><span>${r.child||'—'}</span></div>
           <div class="conf-field"><strong>سن</strong><span>${r.age}</span></div>
+          ${r.sessionTime?`<div class="conf-field"><strong>ساعت جلسه</strong><span>${r.sessionTime}</span></div>`:''}
           ${r.note?`<div class="conf-field" style="grid-column:1/-1"><strong>یادداشت</strong><span>${r.note}</span></div>`:''}
         </div>`).join('');
     }
@@ -1250,7 +1274,7 @@ function renderRegContent(){
       cont.innerHTML='<div class="reg-empty">📭 '+(currentRegTab==='pending'?'هیچ رزروی در انتظار تایید نیست':'هنوز هیچ ثبت‌نامی وجود ندارد')+'</div>';
     } else {
       cont.innerHTML='<table class="reg-table"><thead><tr><th>#</th><th>کلاس / خدمت</th><th>نام والد</th><th>موبایل</th><th>نام کودک</th><th>تاریخ</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>'+
-      list.map((r,i)=>'<tr><td>'+fa(i+1)+'</td><td>'+r.type+'</td><td>'+r.parent+'</td><td dir="ltr">'+r.phone+'</td><td>'+(r.child||'—')+'</td><td>'+(r.date||'—')+'</td><td><span class="reg-badge '+(r.confirmed?'confirmed':'pending')+'">'+(r.confirmed?'✅ تایید شده':'⏳ در انتظار')+'</span></td><td>'+(r.confirmed?'<span style="font-size:.72rem;color:var(--g4)">تایید شده</span>':'<button class="reg-confirm-btn" onclick="confirmReg(\''+r.id+'\')">✅ تایید</button>')+'</td></tr>').join('')+
+      list.map((r,i)=>'<tr><td>'+fa(i+1)+'</td><td>'+r.type+(r.sessionTime?' <span style="color:var(--g4);font-size:.72rem">('+r.sessionTime+')</span>':'')+'</td><td>'+r.parent+'</td><td dir="ltr">'+r.phone+'</td><td>'+(r.child||'—')+'</td><td>'+(r.date||'—')+'</td><td><span class="reg-badge '+(r.confirmed?'confirmed':'pending')+'">'+(r.confirmed?'✅ تایید شده':'⏳ در انتظار')+'</span></td><td>'+(r.confirmed?'<span style="font-size:.72rem;color:var(--g4)">تایید شده</span>':'<button class="reg-confirm-btn" onclick="confirmReg(\''+r.id+'\')">✅ تایید</button>')+'</td></tr>').join('')+
       '</tbody></table>';
     }
   }
@@ -1261,8 +1285,22 @@ function confirmReg(id){
   const reg=registrations.find(r=>r.id===id);
   if(reg){
     reg.confirmed=true;
+    // Bump class capacity for the booked session, once only
+    if(reg.capKey && !reg.capacityApplied){
+      const cap=S.caps[reg.capKey];
+      if(cap){
+        if(cap.cur<cap.max){
+          cap.cur++;
+          reg.capacityApplied=true;
+          renderClasses();
+          S.save();
+        } else {
+          showToast('⚠️ ظرفیت این جلسه تکمیل شده — ظرفیت افزایش نیافت');
+        }
+      }
+    }
     showToast('✅ رزرو '+reg.parent+' تایید شد!');
-    if(window._FB) window._FB.updateRegistration(id, {confirmed:true});
+    if(window._FB) window._FB.updateRegistration(id, {confirmed:true, capacityApplied:reg.capacityApplied||false});
   }
   renderRegContent();
   if(id===currentRegId)showConfirmedBadge();
@@ -1279,6 +1317,9 @@ function renderClasses(){
     const rawPrice=S.prices[c.priceKey];
     const hasPrice=rawPrice!==undefined&&rawPrice!==''&&Number(rawPrice)>0;
     const price=hasPrice?fmtPrice(rawPrice):'';
+    const rawMonthly=c.monthlyPriceKey?S.prices[c.monthlyPriceKey]:undefined;
+    const hasMonthly=rawMonthly!==undefined&&rawMonthly!==''&&Number(rawMonthly)>0;
+    const monthlyPrice=hasMonthly?fmtPrice(rawMonthly):'';
     // check if ALL sessions of this class are full
     const allFull=c.sessions.every(s=>{ const cap=S.caps[s.capKey]; return cap && cap.cur>=cap.max; });
     const sesHtml=c.sessions.map(s=>{
@@ -1294,12 +1335,15 @@ function renderClasses(){
       </div>`;
     }).join('');
     const priceHtml=hasPrice
-      ?`<div class="cprice">${price} <small>تومان</small></div>`
+      ?`<div class="cprice">${price} <small>تومان / جلسه</small></div>${hasMonthly?`<div class="cprice" style="font-size:.78rem;color:var(--g6);margin-top:2px">${monthlyPrice} <small>تومان / ماهانه</small></div>`:''}`
       :`<div class="cprice" style="color:var(--blue);font-size:.74rem;font-weight:700;line-height:1.6">📞 برای هماهنگی و رزرو تماس بگیرید<br><span dir="ltr" style="font-size:.68rem;font-weight:500;color:var(--g6)">For booking, please contact us</span></div>`;
     const fullBadge=allFull?`<div style="background:var(--red);color:white;font-size:.7rem;font-weight:800;padding:3px 10px;border-radius:50px;display:inline-block;margin-bottom:8px">🔴 ظرفیت تکمیل است</div>`:'';
     const resBtn=allFull
       ?`<button class="btn-res" disabled style="opacity:.45;cursor:not-allowed;background:var(--g4)">ظرفیت پر</button>`
-      :`<button class="btn-res" onclick="openModal('کلاس ${c.n}','${price}')">رزرو</button>`;
+      :`<div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn-res" onclick="openModal('کلاس ${c.n} (جلسه‌ای)','${price}')">رزرو جلسه‌ای</button>
+          ${hasMonthly?`<button class="btn-res" style="background:var(--lb)" onclick="openModal('کلاس ${c.n} (ماهیانه)','${monthlyPrice}')">رزرو ماهیانه</button>`:''}
+        </div>`;
     return `<div class="class-card fade">
       <div class="cctop ${c.t}"><span>${c.e}</span><span class="cage">${c.a}</span><span class="cday">${c.d}</span></div>
       <div class="ccbody">
@@ -1336,15 +1380,22 @@ function renderPricing(){
   const cards=Object.values(uniq).map((c,i)=>{
     const rawP=S.prices[c.priceKey];
     const hasP=rawP!==undefined&&rawP!==''&&Number(rawP)>0;
+    const rawM=c.monthlyPriceKey?S.prices[c.monthlyPriceKey]:undefined;
+    const hasM=rawM!==undefined&&rawM!==''&&Number(rawM)>0;
     const priceDisp=hasP
-      ?`<div class="pamt">${fmtPrice(rawP)} <span>تومان</span></div><div class="pper">هر جلسه</div>`
+      ?`<div class="pamt">${fmtPrice(rawP)} <span>تومان</span></div><div class="pper">هر جلسه${hasM?` &nbsp;|&nbsp; ${fmtPrice(rawM)} تومان / ماهانه`:''}</div>`
       :`<div class="pamt" style="font-size:.95rem;color:var(--blue);line-height:1.6">📞 برای هماهنگی و رزرو تماس بگیرید</div><div class="pper" dir="ltr" style="font-size:.72rem;color:var(--g6)">For booking, please contact us</div>`;
-    const btnAction=hasP?`openModal('کلاس ${c.n}','${fmtPrice(rawP)}')`:`openModal('کلاس ${c.n}','')`;
+    const btnsHtml=hasP
+      ?`<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">
+          <button class="pbtn" onclick="openModal('کلاس ${c.n} (جلسه‌ای)','${fmtPrice(rawP)}')">رزرو جلسه‌ای</button>
+          ${hasM?`<button class="pbtn" style="background:var(--lb)" onclick="openModal('کلاس ${c.n} (ماهیانه)','${fmtPrice(rawM)}')">رزرو ماهیانه</button>`:''}
+        </div>`
+      :`<button class="pbtn" onclick="openModal('کلاس ${c.n}','')">رزرو کلاس</button>`;
     return `<div class="pcard ${i===0?'feat':''} fade">${i===0?'<div class="flbl">⭐ پرطرفدار</div>':''}
       <h3>${c.e} ${c.n}</h3><p class="pdesc">${c.a}</p>
       ${priceDisp}
       <ul class="pfeat"><li><span class="chk">✓</span>مربی متخصص</li><li><span class="chk">✓</span>حداکثر ۳۰ نفر</li><li><span class="chk">✓</span>مواد اولیه شامل</li></ul>
-      <button class="pbtn" onclick="${btnAction}">رزرو کلاس</button>
+      ${btnsHtml}
     </div>`;}).join('');
   const hourlyRaw=S.prices.hourly;
   const hourlyHasP=hourlyRaw!==undefined&&hourlyRaw!==''&&Number(hourlyRaw)>0;
@@ -1392,10 +1443,28 @@ function openModal(type,price){
   curT=type;curP=price;
   document.getElementById('mTitle').textContent='رزرو '+type;
   // Detect if this class is full (all sessions at max capacity)
-  const classNameMatch=type.replace(/^کلاس /,'');
+  const classNameMatch=type.replace(/^کلاس /,'').replace(/\s*\((جلسه‌ای|ماهیانه)\)$/,'');
   const matchedClass=getCD().find(c=>c.n===classNameMatch);
   const classFull=matchedClass && matchedClass.sessions.every(s=>{ const cap=S.caps[s.capKey]; return cap && cap.cur>=cap.max; });
   window._curClassFull = classFull||false;
+  window._curMatchedClass = matchedClass||null;
+  // Session selector — only shown when the class has more than one session
+  const sessWrap=document.getElementById('fsessWrap');
+  const sessSel=document.getElementById('fsess');
+  if(matchedClass && matchedClass.sessions.length>1){
+    sessWrap.style.display='block';
+    sessSel.innerHTML=matchedClass.sessions.map(s=>{
+      const cap=S.caps[s.capKey];
+      const ov=S.classOverrides[matchedClass.id];
+      const idx=matchedClass.sessions.indexOf(s);
+      const dispT=(ov&&ov.times&&ov.times[idx])||s.time;
+      const full=cap&&cap.cur>=cap.max;
+      return `<option value="${s.capKey}" ${full?'disabled':''}>${dispT}${full?' — ظرفیت پر':''}</option>`;
+    }).join('');
+  } else {
+    sessWrap.style.display='none';
+    sessSel.innerHTML='';
+  }
   const noPrice=!price||price==='';
   if(noPrice){
     document.getElementById('pAmt').textContent='';
@@ -1431,7 +1500,24 @@ function goS2(){
   const showT=curT.includes('نگهداری')||curT.includes('تولد');
   const tstr=showT?`\nساعت: از ${fr} تا ${to}`:'';
   const amtStr=curP?curP+' تومان':'پس از هماهنگی';
-  const msg=encodeURIComponent(`رسید پرداخت رزرو خانه بازی نوژین\nنوع: ${curT}\nنام والد: ${p}\nنام کودک: ${ch}\nتاریخ: ${dt}${tstr}\nمبلغ: ${amtStr}`);
+  // Determine which class session (capKey) this registration belongs to, for capacity tracking
+  const mc=window._curMatchedClass;
+  let capKey=null,sessionTime='';
+  if(mc){
+    if(mc.sessions.length>1){
+      const sel=document.getElementById('fsess');
+      if(!sel.value){showToast('⚠️ لطفاً ساعت جلسه را انتخاب کنید');return;}
+      const cap=S.caps[sel.value];
+      if(cap && cap.cur>=cap.max){showToast('⚠️ این جلسه ظرفیت پر شده، جلسه دیگری انتخاب کنید');return;}
+      capKey=sel.value;
+      sessionTime=sel.options[sel.selectedIndex].textContent.replace(' — ظرفیت پر','');
+    } else if(mc.sessions.length===1){
+      capKey=mc.sessions[0].capKey;
+      sessionTime=mc.sessions[0].time;
+    }
+  }
+  const sessStr=sessionTime?`\nساعت جلسه: ${sessionTime}`:'';
+  const msg=encodeURIComponent(`رسید پرداخت رزرو خانه بازی نوژین\nنوع: ${curT}\nنام والد: ${p}\nنام کودک: ${ch}\nتاریخ: ${dt}${sessStr}${tstr}\nمبلغ: ${amtStr}`);
   const phone=S.social&&S.social.waNum?S.social.waNum:'989188137985';
   document.getElementById('waL').href=`https://wa.me/${phone}?text=${msg}`;
   document.getElementById('tgL').href=`https://t.me/${phone}?text=${msg}`;
@@ -1442,7 +1528,7 @@ function goS2(){
   const regId='reg-'+Date.now();
   currentRegId=regId;
   const ch2=document.getElementById('fch').value;
-  const newReg={id:regId,type:curT,parent:p,phone:ph,child:ch2,age:document.getElementById('fag').value,date:dt,note:document.getElementById('fnt').value,confirmed:false,ts:Date.now()};
+  const newReg={id:regId,type:curT,parent:p,phone:ph,child:ch2,age:document.getElementById('fag').value,date:dt,note:document.getElementById('fnt').value,capKey,sessionTime,confirmed:false,capacityApplied:false,ts:Date.now()};
   registrations.unshift(newReg);
   if(window._FB) window._FB.saveRegistration(newReg);
   document.getElementById('adminConfirmWrap').style.display=adminAuthed?'block':'none';
@@ -1610,6 +1696,15 @@ function _loadPriceFields(){
   const m1=document.getElementById('aM1Price'),m2=document.getElementById('aM2Price');
   if(m1) m1.value = p.montessori_1 !== undefined ? p.montessori_1 : 0;
   if(m2) m2.value = p.montessori_2 !== undefined ? p.montessori_2 : 0;
+  // monthly prices
+  const setM=(id,key)=>{ const el=document.getElementById(id); if(el) el.value = p[key]!==undefined ? p[key] : ''; };
+  setM('aKollazhM','kollazh_m');
+  setM('aRhythmM','rhythm_m');
+  setM('aBalletM','ballet_m');
+  setM('aTheaterM','theater_m');
+  setM('aActingM','acting_m');
+  setM('aM1PriceM','montessori_1_m');
+  setM('aM2PriceM','montessori_2_m');
 }
 
 function _readPriceFields(){
@@ -1622,6 +1717,14 @@ function _readPriceFields(){
   const a=readNum('aActing');    if(a!==undefined) S.prices.acting    = a;
   const m1=readNum('aM1Price');  if(m1!==undefined) S.prices.montessori_1 = m1;
   const m2=readNum('aM2Price');  if(m2!==undefined) S.prices.montessori_2 = m2;
+  // monthly prices
+  const km=readNum('aKollazhM');   if(km!==undefined) S.prices.kollazh_m   = km;
+  const rm=readNum('aRhythmM');    if(rm!==undefined) S.prices.rhythm_m    = rm;
+  const bm=readNum('aBalletM');    if(bm!==undefined) S.prices.ballet_m    = bm;
+  const tm=readNum('aTheaterM');   if(tm!==undefined) S.prices.theater_m   = tm;
+  const am=readNum('aActingM');    if(am!==undefined) S.prices.acting_m    = am;
+  const m1m=readNum('aM1PriceM');  if(m1m!==undefined) S.prices.montessori_1_m = m1m;
+  const m2m=readNum('aM2PriceM');  if(m2m!==undefined) S.prices.montessori_2_m = m2m;
 }
 
 function savePrices(){
@@ -1802,6 +1905,7 @@ function addNewClass(){
   const inst=document.getElementById('ncInst').value.trim();
   const desc=document.getElementById('ncDesc').value.trim();
   const price=+document.getElementById('ncPrice').value||150000;
+  const priceM=+document.getElementById('ncPriceM').value||0;
   const cap=+document.getElementById('ncCap').value||30;
   const cur=+document.getElementById('ncCur').value||0;
   if(!name){showToast('⚠️ نام کلاس را وارد کنید');return;}
@@ -1820,6 +1924,11 @@ function addNewClass(){
   const priceKey='custom_'+Date.now();
   S.prices[priceKey]=price;
   const newClass={id:'custom-'+Date.now(),n:name,e:emoji,t:color,a:age||'همه سنین',d:day,sessions,inst:inst||'—',priceKey,desc:desc||'کلاس جدید',custom:true};
+  if(priceM>0){
+    const monthlyPriceKey='custom_m_'+Date.now();
+    S.prices[monthlyPriceKey]=priceM;
+    newClass.monthlyPriceKey=monthlyPriceKey;
+  }
   S.extraClasses.push(newClass);
   // reset form
   document.getElementById('ncName').value='';
@@ -1828,6 +1937,7 @@ function addNewClass(){
   document.getElementById('ncInst').value='';
   document.getElementById('ncDesc').value='';
   document.getElementById('ncPrice').value='';
+  document.getElementById('ncPriceM').value='';
   document.getElementById('ncSessionsWrap').innerHTML='';
   ncSessionCount=0;
   addNcSession();
