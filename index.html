@@ -1719,10 +1719,11 @@ function submitWithReceipt(){
   const btn=document.getElementById('submitResBtnS3');
   btn.disabled=true;btn.textContent='در حال ارسال...';
   const reader=new FileReader();
-  reader.onload=function(e){
+  reader.onload=async function(e){
     const receiptData=e.target.result; // base64
     const regId='reg-'+Date.now();
     currentRegId=regId;
+    // Save registration WITHOUT receipt first (so it fits size limits)
     const newReg={
       id:regId,
       type:_pendingReg.type,
@@ -1736,14 +1737,29 @@ function submitWithReceipt(){
       sessionTime:_pendingReg.sessionTime,
       timeFrom:_pendingReg.timeFrom,
       timeTo:_pendingReg.timeTo,
-      receipt:receiptData,
+      receipt:'',
       confirmed:false,
       cancelled:false,
       capacityApplied:false,
       ts:_pendingReg.ts
     };
     registrations.unshift(newReg);
-    if(window._FB) window._FB.saveRegistration(newReg);
+    // Save reg first
+    if(window._FB){
+      await window._FB.saveRegistration(newReg);
+      // Then upload receipt separately and patch
+      try{
+        const receiptUrl = await window._FB.uploadGalleryImage('receipt-'+regId, receiptData);
+        newReg.receipt=receiptUrl;
+        await window._FB.updateRegistration(regId,{receipt:receiptUrl});
+      }catch(e){
+        // If upload fails, store base64 locally only
+        newReg.receipt=receiptData;
+        console.warn('Receipt upload failed, stored locally only',e);
+      }
+    } else {
+      newReg.receipt=receiptData;
+    }
     document.getElementById('adminConfirmWrap').style.display=adminAuthed?'block':'none';
     document.getElementById('confirmedBadge').style.display='none';
     document.getElementById('pendingFooter').style.display='block';
