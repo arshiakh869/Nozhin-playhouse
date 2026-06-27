@@ -160,11 +160,10 @@
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
-<!-- Cloudflare Worker Proxy (جایگزین Firebase SDK — بدون نیاز به VPN) -->
+<!-- Cloudflare Worker Proxy (جایگزین Firebase SDK) -->
 <script>
 (function(){
   const WORKER = "https://nozhin-firebase-proxy.lm10arshiakh86.workers.dev";
-
   async function api(method, path, body) {
     const opts = { method, headers: { "Content-Type": "application/json" } };
     if (body !== undefined) opts.body = JSON.stringify(body);
@@ -172,15 +171,10 @@
     if (!res.ok) throw new Error("Worker " + method + " " + path + " → " + res.status);
     return res.json();
   }
-
   window._FB = {
-    // ── Site config ──
     async loadSiteData() {
-      try {
-        const data = await api("GET", "/config");
-        // gallery is already included by the worker
-        return data;
-      } catch(e) { console.error("CF load error:", e); return null; }
+      try { return await api("GET", "/config"); }
+      catch(e) { console.error("CF load error:", e); return null; }
     },
     async saveSiteData(data) {
       try {
@@ -189,12 +183,9 @@
         return true;
       } catch(e) { console.error("CF save error:", e); return false; }
     },
-    // ── Gallery ──
     async uploadGalleryImage(id, dataUrl) {
-      try {
-        await api("POST", "/gallery", { id, url: dataUrl, ts: Date.now() });
-        return dataUrl;
-      } catch(e) { console.error("CF gallery upload error:", e); return dataUrl; }
+      try { await api("POST", "/gallery", { id, url: dataUrl, ts: Date.now() }); return dataUrl; }
+      catch(e) { console.error("CF gallery upload error:", e); return dataUrl; }
     },
     async deleteGalleryImage(id) {
       try { await api("DELETE", "/gallery/" + id); } catch(e) {}
@@ -202,8 +193,6 @@
     async saveGalleryCaption(id, caption) {
       try { await api("PATCH", "/gallery/" + id, { caption }); } catch(e) {}
     },
-    // ── Real-time listener — Cloudflare Worker ندارد onSnapshot ──
-    // هر ۳۰ ثانیه یکبار poll می‌کنیم (جایگزین سبک real-time)
     listenSiteConfig(callback) {
       api("GET", "/config").then(data => { if(data) callback(data); }).catch(()=>{});
       const timer = setInterval(() => {
@@ -211,33 +200,23 @@
       }, 30000);
       return { unsubscribe: () => clearInterval(timer) };
     },
-    // ── Registrations ──
     async saveRegistration(reg) {
-      try {
-        await api("POST", "/registrations", reg);
-        return true;
-      } catch(e) { console.error("CF saveReg error:", e); return false; }
+      try { await api("POST", "/registrations", reg); return true; }
+      catch(e) { console.error("CF saveReg error:", e); return false; }
     },
     async loadRegistrations() {
-      try {
-        return await api("GET", "/registrations");
-      } catch(e) { console.error("CF loadRegs error:", e); return []; }
+      try { return await api("GET", "/registrations"); }
+      catch(e) { console.error("CF loadRegs error:", e); return []; }
     },
     async updateRegistration(id, fields) {
-      try {
-        await api("PATCH", "/registrations/" + id, fields);
-        return true;
-      } catch(e) { console.error("CF updateReg error:", e); return false; }
+      try { await api("PATCH", "/registrations/" + id, fields); return true; }
+      catch(e) { console.error("CF updateReg error:", e); return false; }
     },
     async deleteRegistration(id) {
-      try {
-        await api("DELETE", "/registrations/" + id);
-        return true;
-      } catch(e) { console.error("CF deleteReg error:", e); return false; }
+      try { await api("DELETE", "/registrations/" + id); return true; }
+      catch(e) { console.error("CF deleteReg error:", e); return false; }
     }
   };
-
-  // Signal that Cloudflare proxy is ready
   window._fbReady = true;
   document.dispatchEvent(new Event('fbReady'));
 })();
@@ -1068,16 +1047,7 @@ const S = {
   sloganBar:'💡 والدین هوشمند = فرزند توانمند \u00a0|\u00a0 هر روز یک تجربه جدید، هر کودک یک ستاره در خانه بازی نوژین همدان 💖',
   workHours:'شنبه تا پنج‌شنبه — ۵ عصر تا ۸ شب (جمعه تعطیل)',
   social: { insta:'khane_bazi_nozhin', waNum:'989188137985' },
-  extraClasses: [
-    {id:'montessori-sat-wed',n:'مونته‌سوری',e:'🌱',t:'ct3',a:'۲ تا ۶ سال',d:'شنبه و چهارشنبه',
-     sessions:[{time:'۵ تا ۶:۳۰',capKey:'montessori-sat-1'},{time:'۵ تا ۶:۳۰',capKey:'montessori-wed-1'}],
-     inst:'خانم یاوری',priceKey:'montessori_1',monthlyPriceKey:'montessori_1_m',termLabel:'ترمی (۱۲ جلسه)',
-     desc:'با الهام از روش علمی دکتر ماریا مونته‌سوری، کودکان در محیطی آماده و هدفمند، آزادانه کشف می‌کنند و می‌آموزند. پژوهش‌های دانشگاهی نشان می‌دهد کودکان مونته‌سوری در مهارت‌های اجرایی، حافظه کوتاه‌مدت، درک اجتماعی و خلاقیت به‌طور چشمگیری از همسالان خود پیشی می‌گیرند — و این مزیت تا سال‌های آینده ادامه می‌یابد.'},
-    {id:'montessori-sun-tue',n:'مونته‌سوری',e:'🌱',t:'ct6',a:'۲ تا ۶ سال',d:'یک‌شنبه و سه‌شنبه',
-     sessions:[{time:'۵ تا ۶:۳۰',capKey:'montessori-sun-1'},{time:'۵ تا ۶:۳۰',capKey:'montessori-tue-1'}],
-     inst:'خانم خزاعی',priceKey:'montessori_2',monthlyPriceKey:'montessori_2_m',termLabel:'ترمی (۱۲ جلسه)',
-     desc:'با الهام از روش علمی دکتر ماریا مونته‌سوری، کودکان در محیطی آماده و هدفمند، آزادانه کشف می‌کنند و می‌آموزند. پژوهش‌های دانشگاهی نشان می‌دهد کودکان مونته‌سوری در مهارت‌های اجرایی، حافظه کوتاه‌مدت، درک اجتماعی و خلاقیت به‌طور چشمگیری از همسالان خود پیشی می‌گیرند — و این مزیت تا سال‌های آینده ادامه می‌یابد.'},
-  ],
+  extraClasses: [],
   caps: {
     'kollazh-1': { label: 'نقاشی کلاژی ۵-۶', cur: 6, max: 30, min: 0 },
     'kollazh-2': { label: 'نقاشی کلاژی ۶-۷', cur: 4, max: 30, min: 0 },
@@ -1198,7 +1168,15 @@ function getCD(){return[
     {time:'۷ تا ۸',capKey:'acting-1'}],
     inst:'آقای ترابی',priceKey:'acting',monthlyPriceKey:'acting_m',
     desc:'کلاس بازیگری برای نوجوانان با تکنیک‌های پیشرفته‌تر صحنه. تقویت بیان، حضور ذهن و هنر اجرا.'},
-  ...S.extraClasses];}
+  {id:'montessori-sat-wed',n:'مونته‌سوری',e:'🌱',t:'ct3',a:'۲ تا ۶ سال',d:'شنبه و چهارشنبه',
+   sessions:[{time:'۵ تا ۶:۳۰',capKey:'montessori-sat-1'},{time:'۵ تا ۶:۳۰',capKey:'montessori-wed-1'}],
+   inst:'خانم یاوری',priceKey:'montessori_1',monthlyPriceKey:'montessori_1_m',termLabel:'ترمی (۱۲ جلسه)',
+   desc:'با الهام از روش علمی دکتر ماریا مونته‌سوری، کودکان در محیطی آماده و هدفمند، آزادانه کشف می‌کنند و می‌آموزند. پژوهش‌های دانشگاهی نشان می‌دهد کودکان مونته‌سوری در مهارت‌های اجرایی، حافظه کوتاه‌مدت، درک اجتماعی و خلاقیت به‌طور چشمگیری از همسالان خود پیشی می‌گیرند — و این مزیت تا سال‌های آینده ادامه می‌یابد.'},
+  {id:'montessori-sun-tue',n:'مونته‌سوری',e:'🌱',t:'ct6',a:'۲ تا ۶ سال',d:'یک‌شنبه و سه‌شنبه',
+   sessions:[{time:'۵ تا ۶:۳۰',capKey:'montessori-sun-1'},{time:'۵ تا ۶:۳۰',capKey:'montessori-tue-1'}],
+   inst:'خانم خزاعی',priceKey:'montessori_2',monthlyPriceKey:'montessori_2_m',termLabel:'ترمی (۱۲ جلسه)',
+   desc:'با الهام از روش علمی دکتر ماریا مونته‌سوری، کودکان در محیطی آماده و هدفمند، آزادانه کشف می‌کنند و می‌آموزند. پژوهش‌های دانشگاهی نشان می‌دهد کودکان مونته‌سوری در مهارت‌های اجرایی، حافظه کوتاه‌مدت، درک اجتماعی و خلاقیت به‌طور چشمگیری از همسالان خود پیشی می‌گیرند — و این مزیت تا سال‌های آینده ادامه می‌یابد.'},
+  ...S.extraClasses.filter(c=>c.id!=='montessori-sat-wed'&&c.id!=='montessori-sun-tue')];}
 
 
 function buildSchedControls(){
@@ -2196,10 +2174,9 @@ function _applyFirebaseData(){
     }catch(e){console.error('rerender error:',e);}
   }
 
-  // Poll/listen for config changes via Cloudflare Worker
+  // Poll config via Cloudflare Worker
   if(window._FB && window._FB.listenSiteConfig){
     window._FB.listenSiteConfig(data => {
-      // gallery is included in /config response from worker
       if(data) {
         S._applyData(data);
         rerender();
