@@ -545,7 +545,7 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
 
 <div class="slogan-bar">💡 والدین هوشمند = فرزند توانمند &nbsp;|&nbsp; هر روز یک تجربه جدید، هر کودک یک ستاره در خانه بازی نوژین همدان 💖</div>
 
-<div class="cat-nav" id="main">
+<div class="cat-nav" id="main" id="catNav">
   <button class="cat-tab active" onclick="showCat('classes')">🎨 کلاس‌ها</button>
   <button class="cat-tab" onclick="showCat('reserve')">📅 رزرو خدمات</button>
   <button class="cat-tab" onclick="showCat('about')">📖 درباره کلاس‌ها</button>
@@ -559,6 +559,11 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
     <div class="sh fade"><div class="stag">برنامه هفتگی</div><h2 class="stitle">کلاس‌های آموزشی</h2><p class="ssub">برنامه این هفته را ببینید و جای فرزندتان را رزرو کنید</p></div>
     <div class="grid3" id="classesGrid"></div>
   </section>
+</div>
+
+<!-- CUSTOM TABS CONTAINER (dynamic) -->
+<div id="customTabSections">
+
 </div>
 
 <!-- RESERVE -->
@@ -785,6 +790,7 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
     <!-- TABS -->
     <div class="atabs">
       <button class="atab active" onclick="switchTab('tab-site')">🌐 سایت</button>
+      <button class="atab" onclick="switchTab('tab-tabs')">📑 تب‌ها</button>
       <button class="atab" onclick="switchTab('tab-classes')">🎨 کلاس‌ها</button>
       <button class="atab" onclick="switchTab('tab-addclass')">➕ کلاس جدید</button>
       <button class="atab" onclick="switchTab('tab-sched')">📅 برنامه</button>
@@ -840,6 +846,29 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
       </div>
     </div>
 
+    <!-- TAB: TABS MANAGEMENT -->
+    <div class="atab-content" id="tab-tabs" style="display:none">
+      <div class="asec">
+        <h3>📑 تب‌های اصلی سایت</h3>
+        <p style="font-size:.76rem;color:var(--g4);margin-bottom:14px;line-height:1.7">می‌توانید تب جدیدی مثل «کارگاه‌ها» یا «رویدادها» اضافه کنید. بعد از ساخت تب، از بخش «کلاس جدید» می‌توانید کلاس‌ها را به آن تب اختصاص دهید.</p>
+        <div id="tabsList" style="margin-bottom:18px;"></div>
+        <div style="background:var(--g1);border-radius:14px;padding:16px;margin-top:16px;">
+          <div style="font-size:.82rem;font-weight:700;color:var(--blue);margin-bottom:12px;">➕ افزودن تب جدید</div>
+          <div class="arow">
+            <div class="afield"><label>نام تب</label><input type="text" id="ntLabel" placeholder="مثلاً: کارگاه‌ها"></div>
+            <div class="afield"><label>ایموجی</label><input type="text" id="ntIcon" placeholder="🛠" maxlength="3" value="📌"></div>
+          </div>
+          <button class="admin-save" style="margin-top:4px" onclick="addCustomTab()">➕ ساخت تب</button>
+        </div>
+      </div>
+      <div class="asec">
+        <h3>📋 انتساب کلاس به تب</h3>
+        <p style="font-size:.76rem;color:var(--g4);margin-bottom:12px;line-height:1.7">برای هر کلاس، تب نمایش آن را انتخاب کنید.</p>
+        <div id="classTabAssignList"></div>
+        <button class="admin-save" style="margin-top:8px" onclick="saveClassTabAssignments()">💾 ذخیره انتساب‌ها</button>
+      </div>
+    </div>
+
     <!-- TAB: CLASSES -->
     <div class="atab-content" id="tab-classes" style="display:none">
       <div id="classEditList"></div>
@@ -860,6 +889,13 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
               <option value="ct4">زرد</option><option value="ct5">لیلکی</option><option value="ct6">آبی</option>
             </select>
           </div>
+          <div class="afield"><label>نمایش در تب</label>
+            <select id="ncTabId">
+              <option value="">کلاس‌های اصلی (پیش‌فرض)</option>
+            </select>
+          </div>
+        </div>
+        <div class="arow">
           <div class="afield"><label>روز برگزاری</label>
             <select id="ncDay">
               <option>شنبه</option><option>یک‌شنبه</option><option>دوشنبه</option>
@@ -945,6 +981,13 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
         <div class="arow">
           <div class="afield"><label>مونته‌سوری ۲ (یک‌شنبه/سه‌شنبه) — جلسه‌ای</label><input type="number" id="aM2Price" min="0" placeholder="0 = تماس بگیرید"></div>
           <div class="afield"><label>مونته‌سوری ۲ — ترمی / ۱۲ جلسه</label><input type="number" id="aM2PriceM" min="0" placeholder="0 = غیرفعال"></div>
+        </div>
+        <div style="border-top:1.5px solid var(--g2);margin:14px 0;padding-top:14px;">
+          <div style="font-size:.8rem;font-weight:700;color:var(--blue);margin-bottom:10px;">🛠 کارگاه‌ها</div>
+        </div>
+        <div class="arow">
+          <div class="afield"><label>کارگاه مادر و کودک — جلسه‌ای (تومان)</label><input type="number" id="aWorkshopMC" min="0" placeholder="0 = تماس بگیرید"></div>
+          <div class="afield"><label>کارگاه مادر و کودک — ماهیانه (تومان)</label><input type="number" id="aWorkshopMCM" min="0" placeholder="0 = غیرفعال"></div>
         </div>
         <button class="admin-save" style="margin-top:8px" onclick="savePrices()">💾 ذخیره قیمت‌ها و کارت</button>
         <div id="pricesSaveStatus" style="font-size:.76rem;color:var(--g4);margin-top:6px"></div>
@@ -1038,7 +1081,8 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
 const S = {
   card: { num: '6037 9915 6115 5155', owner: 'فتانه ترابی' },
   prices: { kollazh: 150000, rhythm: 150000, ballet: 180000, theater: 160000, acting: 160000, hourly: 200000, montessori_1: 400000, montessori_2: 400000,
-    kollazh_m: 500000, rhythm_m: 500000, ballet_m: 600000, theater_m: 550000, acting_m: 550000, montessori_1_m: 4800000, montessori_2_m: 4800000 },
+    kollazh_m: 500000, rhythm_m: 500000, ballet_m: 600000, theater_m: 550000, acting_m: 550000, montessori_1_m: 4800000, montessori_2_m: 4800000,
+    workshop_mother_child: 0 },
   hero: {
     t1:'فضایی امن و شاد', t2:'رشد کودک',
     desc:'خانه بازی نوژین همدان — فضایی گرم، شاد و آموزشی برای کودکان شما. کلاس‌های تخصصی باله، نقاشی، ریتم، مونته‌سوری و نمایش خلاق. نگهداری ساعتی و سالن تولد رویایی — همه در یک مکان در همدان.',
@@ -1047,7 +1091,12 @@ const S = {
   sloganBar:'💡 والدین هوشمند = فرزند توانمند \u00a0|\u00a0 هر روز یک تجربه جدید، هر کودک یک ستاره در خانه بازی نوژین همدان 💖',
   workHours:'شنبه تا پنج‌شنبه — ۵ عصر تا ۸ شب (جمعه تعطیل)',
   social: { insta:'khane_bazi_nozhin', waNum:'989188137985' },
-  extraClasses: [],
+  extraClasses: [
+    {id:'workshop-mother-child',n:'کارگاه مادر و کودک',e:'👩‍👧',t:'ct3',a:'همه سنین',d:'اعلام می‌شود',sessions:[{time:'اعلام می‌شود',capKey:'workshop-mother-child-1'}],inst:'—',priceKey:'workshop_mother_child',monthlyPriceKey:'workshop_mother_child_m',desc:'کارگاه تخصصی مادر و کودک — فضایی برای تقویت ارتباط عاطفی و بازی مشترک مادر و فرزند. روز، ساعت و قیمت از پنل ادمین قابل تنظیم است.',custom:false,tabId:'workshops'}
+  ],
+  customTabs: [
+    { id: 'workshops', label: '🛠 کارگاه‌ها', icon: '🛠', order: 1 }
+  ],
   caps: {
     'kollazh-1': { label: 'نقاشی کلاژی ۵-۶', cur: 6, max: 30, min: 0 },
     'kollazh-2': { label: 'نقاشی کلاژی ۶-۷', cur: 4, max: 30, min: 0 },
@@ -1064,10 +1113,12 @@ const S = {
     'montessori-wed-1': { label: 'مونته‌سوری چهارشنبه ۵-۶:۳۰', cur: 0, max: 15, min: 0 },
     'montessori-sun-1': { label: 'مونته‌سوری یک‌شنبه ۵-۶:۳۰', cur: 0, max: 15, min: 0 },
     'montessori-tue-1': { label: 'مونته‌سوری سه‌شنبه ۵-۶:۳۰', cur: 0, max: 15, min: 0 },
+    'workshop-mother-child-1': { label: 'کارگاه مادر و کودک', cur: 0, max: 20, min: 0 },
   },
   phones: { p1: '09014188081', p2: '09188137985', p3: '09931413922' },
   addr: 'همدان — ۱۸ متری ذوالفقار، روبروی پارک گلها، انتهای کوچه گلستان',
   classOverrides: {},
+  deletedBaseClasses: [],
   gallery: [],
   STORAGE_KEY: 'nozhinSiteData_v1',
   save(){
@@ -1075,7 +1126,9 @@ const S = {
       card:this.card, prices:this.prices, hero:this.hero, sloganBar:this.sloganBar,
       workHours:this.workHours, social:this.social, extraClasses:this.extraClasses,
       caps:this.caps, phones:this.phones, addr:this.addr, classOverrides:this.classOverrides,
-      adminPass:(typeof ADMIN_PASS_VAR!=='undefined'?ADMIN_PASS_VAR:undefined)
+      adminPass:(typeof ADMIN_PASS_VAR!=='undefined'?ADMIN_PASS_VAR:undefined),
+      deletedBaseClasses:this.deletedBaseClasses||[],
+      customTabs:this.customTabs||[]
       // NOTE: gallery NOT included here — saved separately per-image
     };
     // Firebase save (primary)
@@ -1133,7 +1186,9 @@ const S = {
     if(data.phones) Object.assign(this.phones, data.phones);
     if(typeof data.addr==='string') this.addr=data.addr;
     if(data.classOverrides) Object.assign(this.classOverrides, data.classOverrides);
+    if(Array.isArray(data.deletedBaseClasses)) this.deletedBaseClasses=data.deletedBaseClasses;
     if(Array.isArray(data.gallery)) this.gallery=data.gallery;
+    if(Array.isArray(data.customTabs)) this.customTabs=data.customTabs;
     if(data.adminPass && typeof ADMIN_PASS_VAR!=='undefined') { try{ ADMIN_PASS_VAR=data.adminPass; }catch(e){} }
   }
 };
@@ -1143,7 +1198,7 @@ function fmtPrice(n){return fa(Number(n).toLocaleString('en'));}
 function getPriceStr(key){return fmtPrice(S.prices[key]);}
 
 // ===== CLASS DATA =====
-function getCD(){return[
+function getCD(){const _del=S.deletedBaseClasses||[];return[
   {id:'kollazh',n:'نقاشی کلاژی',e:'🎨',t:'ct1',a:'۳ تا ۸ سال',d:'شنبه',sessions:[
     {time:'۵ تا ۶',capKey:'kollazh-1'},{time:'۶ تا ۷',capKey:'kollazh-2'}],
     inst:'خانم قربانی چم',priceKey:'kollazh',monthlyPriceKey:'kollazh_m',
@@ -1176,7 +1231,13 @@ function getCD(){return[
    sessions:[{time:'۵ تا ۶:۳۰',capKey:'montessori-sun-1'},{time:'۵ تا ۶:۳۰',capKey:'montessori-tue-1'}],
    inst:'خانم خزاعی',priceKey:'montessori_2',monthlyPriceKey:'montessori_2_m',termLabel:'ترمی (۱۲ جلسه)',
    desc:'با الهام از روش علمی دکتر ماریا مونته‌سوری، کودکان در محیطی آماده و هدفمند، آزادانه کشف می‌کنند و می‌آموزند. پژوهش‌های دانشگاهی نشان می‌دهد کودکان مونته‌سوری در مهارت‌های اجرایی، حافظه کوتاه‌مدت، درک اجتماعی و خلاقیت به‌طور چشمگیری از همسالان خود پیشی می‌گیرند — و این مزیت تا سال‌های آینده ادامه می‌یابد.'},
-  ...S.extraClasses.filter(c=>c.id!=='montessori-sat-wed'&&c.id!=='montessori-sun-tue')];}
+  ...S.extraClasses.filter(c=>c.id!=='montessori-sat-wed'&&c.id!=='montessori-sun-tue')].filter(c=>!_del.includes(c.id)).map(c=>{
+    // merge tabId from classOverrides for base classes
+    const ov=S.classOverrides[c.id];
+    if(ov&&ov.tabId!==undefined&&c.tabId===undefined) c.tabId=ov.tabId;
+    return c;
+  });
+}
 
 
 function buildSchedControls(){
@@ -1298,7 +1359,7 @@ function showConfirmedBadge(){
 }
 
 function renderClasses(){
-  document.getElementById('classesGrid').innerHTML=getCD().map(c=>{
+  document.getElementById('classesGrid').innerHTML=getCD().filter(c=>!c.tabId).map(c=>{
     const rawPrice=S.prices[c.priceKey];
     const hasPrice=rawPrice!==undefined&&rawPrice!==''&&Number(rawPrice)>0;
     const price=hasPrice?fmtPrice(rawPrice):'';
@@ -1628,9 +1689,10 @@ function switchTab(id){
   event.currentTarget.classList.add('active');
   if(id==='tab-stats') renderStats();
   if(id==='tab-classes') buildClassEditControls();
-  if(id==='tab-addclass') buildDeleteClassList();
+  if(id==='tab-addclass'){ buildDeleteClassList(); _populateTabSelects(); }
   if(id==='tab-gallery') buildGalAdminGrid();
   if(id==='tab-prices') _loadPriceFields();
+  if(id==='tab-tabs'){ buildTabsList(); buildClassTabAssignList(); }
 }
 
 function _openAdminPanel(){
@@ -1692,6 +1754,11 @@ function _loadPriceFields(){
   setM('aActingM','acting_m');
   setM('aM1PriceM','montessori_1_m');
   setM('aM2PriceM','montessori_2_m');
+  // workshop prices
+  const wmc=document.getElementById('aWorkshopMC');
+  const wmcm=document.getElementById('aWorkshopMCM');
+  if(wmc) wmc.value=p.workshop_mother_child!==undefined?p.workshop_mother_child:0;
+  if(wmcm) wmcm.value=p.workshop_mother_child_m!==undefined?p.workshop_mother_child_m:0;
 }
 
 function _readPriceFields(){
@@ -1712,6 +1779,9 @@ function _readPriceFields(){
   const am=readNum('aActingM');    if(am!==undefined) S.prices.acting_m    = am;
   const m1m=readNum('aM1PriceM');  if(m1m!==undefined) S.prices.montessori_1_m = m1m;
   const m2m=readNum('aM2PriceM');  if(m2m!==undefined) S.prices.montessori_2_m = m2m;
+  // workshop
+  const wmc=readNum('aWorkshopMC');  if(wmc!==undefined) S.prices.workshop_mother_child = wmc;
+  const wmcm=readNum('aWorkshopMCM'); if(wmcm!==undefined) S.prices.workshop_mother_child_m = wmcm;
 }
 
 function savePrices(){
@@ -1896,6 +1966,8 @@ function addNewClass(){
   const priceM=+document.getElementById('ncPriceM').value||0;
   const cap=+document.getElementById('ncCap').value||30;
   const cur=+document.getElementById('ncCur').value||0;
+  const tabIdEl=document.getElementById('ncTabId');
+  const tabId=tabIdEl?tabIdEl.value:'';
   if(!name){showToast('⚠️ نام کلاس را وارد کنید');return;}
   // collect sessions
   const sessionInputs=document.querySelectorAll('#ncSessionsWrap input');
@@ -1911,7 +1983,7 @@ function addNewClass(){
   if(sessions.length===0){showToast('⚠️ حداقل یک جلسه وارد کنید');return;}
   const priceKey='custom_'+Date.now();
   S.prices[priceKey]=price;
-  const newClass={id:'custom-'+Date.now(),n:name,e:emoji,t:color,a:age||'همه سنین',d:day,sessions,inst:inst||'—',priceKey,desc:desc||'کلاس جدید',custom:true};
+  const newClass={id:'custom-'+Date.now(),n:name,e:emoji,t:color,a:age||'همه سنین',d:day,sessions,inst:inst||'—',priceKey,desc:desc||'کلاس جدید',custom:true,tabId:tabId||''};
   if(priceM>0){
     const monthlyPriceKey='custom_m_'+Date.now();
     S.prices[monthlyPriceKey]=priceM;
@@ -1928,36 +2000,174 @@ function addNewClass(){
   document.getElementById('ncPriceM').value='';
   document.getElementById('ncSessionsWrap').innerHTML='';
   ncSessionCount=0;
+  if(tabIdEl) tabIdEl.value='';
   addNcSession();
   renderClasses();
   renderDetails();
   buildDeleteClassList();
+  renderCustomTabs();
   showToast('✅ کلاس «'+name+'» اضافه شد!');
 }
+// کلاس‌های پایه که hardcode هستن
+const BASE_CLASS_IDS=['kollazh','rhythm-mon','ballet','rhythm-wed','theater','acting','montessori-sat-wed','montessori-sun-tue'];
+
 function buildDeleteClassList(){
-  const custom=S.extraClasses;
+  const all=getCD();
   const wrap=document.getElementById('deleteClassList');
-  if(!custom||custom.length===0){
-    wrap.innerHTML='<div style="font-size:.8rem;color:var(--g4);padding:10px">هنوز کلاس اضافه‌شده‌ای وجود ندارد</div>';
+  if(!all||all.length===0){
+    wrap.innerHTML='<div style="font-size:.8rem;color:var(--g4);padding:10px">کلاسی وجود ندارد</div>';
     return;
   }
-  wrap.innerHTML=custom.map((c,i)=>`
-    <div style="display:flex;align-items:center;justify-content:space-between;background:var(--g1);border-radius:10px;padding:10px 14px;margin-bottom:7px;">
-      <span style="font-size:.85rem;font-weight:600;color:var(--blue)">${c.e} ${c.n} — ${c.d}</span>
-      <button class="del-class-btn" onclick="deleteClass(${i})">🗑 حذف</button>
-    </div>`).join('');
+  wrap.innerHTML=`
+    <div style="font-size:.76rem;color:var(--g4);margin-bottom:10px;line-height:1.7">
+      کلاس‌های پایه با ❌ علامت دارند — حذف آن‌ها فقط تا رفرش صفحه باقی می‌ماند مگر اینکه ذخیره کنید.
+    </div>
+  `+all.map((c)=>{
+    const isBase=BASE_CLASS_IDS.includes(c.id);
+    return `<div style="display:flex;align-items:center;justify-content:space-between;background:${isBase?'white':'var(--g1)'};border:1.5px solid ${isBase?'var(--g2)':'transparent'};border-radius:10px;padding:10px 14px;margin-bottom:7px;">
+      <span style="font-size:.85rem;font-weight:600;color:var(--blue)">${c.e} ${c.n} <span style="font-size:.75rem;color:var(--g6)">— ${c.d}</span>${isBase?'':' <span style="font-size:.68rem;background:rgba(54,201,176,.12);color:#1a8c6e;padding:2px 7px;border-radius:50px;margin-right:4px">اضافه‌شده</span>'}</span>
+      <button class="del-class-btn" onclick="deleteClassById('${c.id}')">🗑 حذف</button>
+    </div>`;
+  }).join('');
 }
-function deleteClass(i){
-  const c=S.extraClasses[i];
-  if(!c) return;
-  S.extraClasses.splice(i,1);
+
+function deleteClassById(id){
+  const isBase=BASE_CLASS_IDS.includes(id);
+  if(isBase){
+    // حذف از کلاس‌های پایه — یه آرایه مخفی نگه‌داریم
+    if(!S.deletedBaseClasses) S.deletedBaseClasses=[];
+    if(!S.deletedBaseClasses.includes(id)) S.deletedBaseClasses.push(id);
+  } else {
+    const idx=S.extraClasses.findIndex(c=>c.id===id);
+    if(idx===-1) return;
+    S.extraClasses.splice(idx,1);
+  }
+  const name=getCD().find(c=>c.id===id)?.n||id;
   renderClasses();
   renderDetails();
   buildDeleteClassList();
-  showToast('🗑 کلاس «'+c.n+'» حذف شد');
+  renderCustomTabs();
+  S.save();
+  showToast('🗑 کلاس «'+name+'» حذف شد');
 }
 
-// ===== GALLERY (admin upload + public display) =====
+// برای سازگاری با کد قدیمی
+function deleteClass(i){
+  const c=S.extraClasses[i];
+  if(!c) return;
+  deleteClassById(c.id);
+}
+
+// ===== CUSTOM TAB MANAGEMENT =====
+function buildTabsList(){
+  const wrap=document.getElementById('tabsList');
+  if(!wrap) return;
+  const tabs=S.customTabs||[];
+  if(tabs.length===0){
+    wrap.innerHTML='<div style="font-size:.8rem;color:var(--g4);padding:10px">هنوز تب سفارشی ساخته نشده. یکی بساز! ⬇</div>';
+    return;
+  }
+  wrap.innerHTML=tabs.map(tab=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;background:white;border:1.5px solid var(--g2);border-radius:10px;padding:10px 14px;margin-bottom:7px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:1.1rem;">${tab.icon||'📑'}</span>
+        <input type="text" value="${tab.label}" id="tl-label-${tab.id}" style="border:1.5px solid var(--g2);border-radius:8px;padding:5px 10px;font-family:'Vazirmatn',sans-serif;font-size:.82rem;outline:none;width:140px;" onblur="updateTabLabel('${tab.id}')">
+      </div>
+      <button class="del-class-btn" onclick="deleteCustomTab('${tab.id}')">🗑 حذف</button>
+    </div>`).join('');
+}
+
+function updateTabLabel(id){
+  const inp=document.getElementById('tl-label-'+id);
+  if(!inp) return;
+  const tab=S.customTabs.find(t=>t.id===id);
+  if(tab){
+    tab.label=inp.value;
+    renderCustomTabs();
+  }
+}
+
+function addCustomTab(){
+  const label=(document.getElementById('ntLabel').value||'').trim();
+  const icon=(document.getElementById('ntIcon').value||'📌').trim();
+  if(!label){showToast('⚠️ نام تب را وارد کنید');return;}
+  const id='tab-custom-'+Date.now();
+  if(!S.customTabs) S.customTabs=[];
+  const order=S.customTabs.length+1;
+  S.customTabs.push({id,label:icon+' '+label,icon,order});
+  document.getElementById('ntLabel').value='';
+  document.getElementById('ntIcon').value='📌';
+  buildTabsList();
+  renderCustomTabs();
+  _populateTabSelects();
+  buildClassTabAssignList();
+  S.save();
+  showToast('✅ تب «'+label+'» ساخته شد!');
+}
+
+function deleteCustomTab(id){
+  if(!S.customTabs) return;
+  const idx=S.customTabs.findIndex(t=>t.id===id);
+  if(idx===-1) return;
+  const name=S.customTabs[idx].label;
+  S.customTabs.splice(idx,1);
+  // unassign classes in this tab
+  S.extraClasses.forEach(c=>{ if(c.tabId===id) c.tabId=''; });
+  buildTabsList();
+  renderCustomTabs();
+  _populateTabSelects();
+  buildClassTabAssignList();
+  S.save();
+  showToast('🗑 تب «'+name+'» حذف شد');
+}
+
+function _populateTabSelects(){
+  const tabs=S.customTabs||[];
+  const selects=document.querySelectorAll('#ncTabId');
+  selects.forEach(sel=>{
+    const cur=sel.value;
+    sel.innerHTML='<option value="">کلاس‌های اصلی (پیش‌فرض)</option>'+tabs.map(t=>`<option value="${t.id}" ${cur===t.id?'selected':''}>${t.label}</option>`).join('');
+  });
+}
+
+function buildClassTabAssignList(){
+  const wrap=document.getElementById('classTabAssignList');
+  if(!wrap) return;
+  const all=getCD();
+  const tabs=S.customTabs||[];
+  if(all.length===0){ wrap.innerHTML='<div style="font-size:.8rem;color:var(--g4);">هنوز کلاسی وجود ندارد</div>'; return; }
+  wrap.innerHTML=all.map(c=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;background:white;border:1.5px solid var(--g2);border-radius:10px;padding:10px 14px;margin-bottom:7px;">
+      <span style="font-size:.85rem;font-weight:600;color:var(--blue)">${c.e} ${c.n}</span>
+      <select id="assign-tab-${c.id}" style="border:1.5px solid var(--g2);border-radius:8px;padding:5px 9px;font-family:'Vazirmatn',sans-serif;font-size:.78rem;outline:none;">
+        <option value="" ${!c.tabId?'selected':''}>کلاس‌های اصلی</option>
+        ${tabs.map(t=>`<option value="${t.id}" ${c.tabId===t.id?'selected':''}>${t.label}</option>`).join('')}
+      </select>
+    </div>`).join('');
+}
+
+function saveClassTabAssignments(){
+  const all=getCD();
+  all.forEach(c=>{
+    const sel=document.getElementById('assign-tab-'+c.id);
+    if(!sel) return;
+    // update in extraClasses or base class override
+    const extra=S.extraClasses.find(e=>e.id===c.id);
+    if(extra){
+      extra.tabId=sel.value;
+    } else {
+      // base class — store in classOverrides
+      S.classOverrides[c.id]=S.classOverrides[c.id]||{};
+      S.classOverrides[c.id].tabId=sel.value;
+    }
+  });
+  renderClasses();
+  renderCustomTabs();
+  S.save();
+  showToast('✅ انتساب تب‌ها ذخیره شد!');
+}
+
+
 const GAL_MAX_DIM=1280; // max width/height for compressed images
 const GAL_JPEG_QUALITY=0.72;
 
@@ -2132,12 +2342,124 @@ function toggleCal(){const w=document.getElementById('calWrap');w.style.display=
 function chM(dir){cM+=dir;if(cM>12){cM=1;cY++;}if(cM<1){cM=12;cY--;}renderCal();}
 document.addEventListener('click',e=>{const w=document.getElementById('calWrap'),i=document.getElementById('fdt');if(w&&!w.contains(e.target)&&e.target!==i)w.style.display='none';});
 
-function showCat(id){document.querySelectorAll('.cat-section').forEach(s=>s.classList.remove('visible'));document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active'));document.getElementById('cat-'+id).classList.add('visible');const map={classes:0,reserve:1,about:2,gallery:3,contact:4};if(map[id]!==undefined)document.querySelectorAll('.cat-tab')[map[id]].classList.add('active');document.getElementById('main').scrollIntoView({behavior:'smooth'});obs();}
+// ===== CUSTOM TABS (admin-managed) =====
+function renderCustomTabs(){
+  const tabs=S.customTabs||[];
+  const catNav=document.getElementById('catNav')||document.querySelector('.cat-nav');
+  
+  // Remove old custom tab buttons
+  catNav.querySelectorAll('.cat-tab[data-custom]').forEach(b=>b.remove());
+  
+  // Add custom tab buttons before contact tab
+  const contactBtn=catNav.querySelector('.cat-tab[data-catid="contact"]')||catNav.lastElementChild;
+  tabs.sort((a,b)=>(a.order||99)-(b.order||99)).forEach(tab=>{
+    // avoid duplicate
+    if(catNav.querySelector('.cat-tab[data-catid="'+tab.id+'"]')) return;
+    const btn=document.createElement('button');
+    btn.className='cat-tab';
+    btn.setAttribute('data-catid',tab.id);
+    btn.setAttribute('data-custom','1');
+    btn.textContent=tab.label;
+    btn.onclick=()=>showCat(tab.id);
+    catNav.insertBefore(btn,contactBtn);
+  });
+  // Add data-catid to built-in tabs
+  const builtins=[['classes','🎨 کلاس‌ها'],['reserve','📅 رزرو خدمات'],['about','📖 درباره کلاس‌ها'],['gallery','📸 گالری تصاویر'],['contact','📞 تماس']];
+  catNav.querySelectorAll('.cat-tab:not([data-catid])').forEach((btn,i)=>{
+    if(builtins[i]) btn.setAttribute('data-catid',builtins[i][0]);
+  });
+
+  // Render custom tab section divs
+  const container=document.getElementById('customTabSections');
+  if(!container) return;
+  // Remove old
+  container.querySelectorAll('.cat-section[data-custom]').forEach(s=>s.remove());
+  tabs.forEach(tab=>{
+    let sec=document.getElementById('cat-'+tab.id);
+    if(!sec){
+      sec=document.createElement('div');
+      sec.className='cat-section';
+      sec.id='cat-'+tab.id;
+      sec.setAttribute('data-custom','1');
+      container.appendChild(sec);
+    }
+    // Get classes for this tab
+    const tabClasses=getCD().filter(c=>c.tabId===tab.id);
+    sec.innerHTML=`<section class="section section-alt">
+      <div class="sh fade"><div class="stag">${tab.label}</div><h2 class="stitle">${tab.label}</h2><p class="ssub">کلاس‌ها و کارگاه‌های این بخش</p></div>
+      <div class="grid3" id="grid-${tab.id}">${tabClasses.length===0?'<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--g6);font-size:.9rem;">📭 هنوز کلاسی در این تب اضافه نشده است</div>':tabClasses.map(c=>renderClassCard(c)).join('')}</div>
+    </section>`;
+  });
+  obs();
+}
+
+function renderClassCard(c){
+  const rawPrice=S.prices[c.priceKey];
+  const hasPrice=rawPrice!==undefined&&rawPrice!==''&&Number(rawPrice)>0;
+  const price=hasPrice?fmtPrice(rawPrice):'';
+  const rawMonthly=c.monthlyPriceKey?S.prices[c.monthlyPriceKey]:undefined;
+  const hasMonthly=rawMonthly!==undefined&&rawMonthly!==''&&Number(rawMonthly)>0;
+  const monthlyPrice=hasMonthly?fmtPrice(rawMonthly):'';
+  const allFull=c.sessions.every(s=>{ const cap=S.caps[s.capKey]; return cap && cap.cur>=cap.max; });
+  const sesHtml=c.sessions.map(s=>{
+    const cap=S.caps[s.capKey]||{cur:0,max:20};
+    const _ov=S.classOverrides[c.id];
+    const _dispT=(_ov&&_ov.times&&_ov.times[c.sessions.indexOf(s)])||s.time;
+    const isFull=cap.cur>=cap.max;
+    const pct=Math.min(100,Math.round(cap.cur/cap.max*100));
+    return `<div style="display:flex;align-items:center;gap:8px;font-size:.72rem;color:var(--g6);margin-bottom:4px;">
+      <span>🕐 ${_dispT}</span>
+      <div style="flex:1;height:5px;background:#eee;border-radius:5px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${isFull?'var(--red)':'linear-gradient(90deg,#6BCB77,var(--lb))'};border-radius:5px"></div></div>
+      <span style="color:${isFull?'var(--red)':'var(--g6)'};font-weight:700">${isFull?'🔴 پر':fa(cap.cur)+'/'+fa(cap.max)}</span>
+    </div>`;
+  }).join('');
+  const monthlyLabel=c.termLabel||'ماهانه';
+  const priceHtml=hasPrice
+    ?`<div class="cprice">${price} <small>تومان / جلسه</small></div>${hasMonthly?`<div class="cprice" style="font-size:.78rem;color:var(--g6);margin-top:2px">${monthlyPrice} <small>تومان / ${monthlyLabel}</small></div>`:''}`
+    :`<div class="cprice" style="color:var(--blue);font-size:.74rem;font-weight:700;line-height:1.6">📞 برای هماهنگی و رزرو تماس بگیرید<br><span dir="ltr" style="font-size:.68rem;font-weight:500;color:var(--g6)">For booking, please contact us</span></div>`;
+  const fullBadge=allFull?`<div style="background:var(--red);color:white;font-size:.7rem;font-weight:800;padding:3px 10px;border-radius:50px;display:inline-block;margin-bottom:8px">🔴 ظرفیت تکمیل است</div>`:'';
+  const resBtn=allFull
+    ?`<button class="btn-res" disabled style="opacity:.45;cursor:not-allowed;background:var(--g4)">ظرفیت پر</button>`
+    :`<div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn-res" onclick="openModal('کلاس ${c.n} (جلسه‌ای)','${price}')">رزرو جلسه‌ای</button>
+        ${hasMonthly?`<button class="btn-res" style="background:var(--lb)" onclick="openModal('کلاس ${c.n} (${monthlyLabel})','${monthlyPrice}')">رزرو ${c.termLabel?'ترمی':'ماهیانه'}</button>`:''}
+      </div>`;
+  return `<div class="class-card fade">
+    <div class="cctop ${c.t}"><span>${c.e}</span><span class="cage">${c.a}</span><span class="cday">${c.d}</span></div>
+    <div class="ccbody">
+      <h3>${c.n}</h3><p>${c.desc}</p>
+      ${fullBadge}
+      <div style="margin-bottom:10px">${sesHtml}</div>
+      <div class="cmeta"><span>👩\u200d🏫 ${c.inst}</span></div>
+      <div class="cfoot">${priceHtml}${resBtn}</div>
+    </div>
+  </div>`;
+}
+
+
+  document.querySelectorAll('.cat-section').forEach(s=>s.classList.remove('visible'));
+  document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active'));
+  const target=document.getElementById('cat-'+id);
+  if(target) target.classList.add('visible');
+  // find matching tab button by data-catid or by position mapping
+  const tabBtn=document.querySelector('.cat-tab[data-catid="'+id+'"]');
+  if(tabBtn) tabBtn.classList.add('active');
+  else {
+    // fallback for built-in tabs with no data-catid
+    const map={classes:0,reserve:1,about:2,gallery:3,contact:4};
+    if(map[id]!==undefined){
+      const allTabs=document.querySelectorAll('.cat-tab');
+      if(allTabs[map[id]]) allTabs[map[id]].classList.add('active');
+    }
+  }
+  document.getElementById('main').scrollIntoView({behavior:'smooth'});
+  obs();
+}
 function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 const io=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in');});},{threshold:.1});
 function obs(){document.querySelectorAll('.fade:not(.in)').forEach(el=>io.observe(el));}
 
-renderClasses();renderDetails();updateHourlyDisp();obs();
+renderClasses();renderDetails();updateHourlyDisp();renderCustomTabs();obs();
 
 try{
   S.load(); // immediate load from localStorage (fallback)
@@ -2145,6 +2467,7 @@ try{
   if(typeof renderDetails==='function') renderDetails();
   if(typeof renderPricing==='function') renderPricing();
   if(typeof updateHourlyDisp==='function') updateHourlyDisp();
+  if(typeof renderCustomTabs==='function') renderCustomTabs();
   if(typeof applyHero==='function') applyHero();
   if(typeof applyStats==='function') applyStats();
   if(typeof applySlogan==='function') applySlogan();
@@ -2163,6 +2486,7 @@ function _applyFirebaseData(){
       if(typeof renderDetails==='function') renderDetails();
       if(typeof renderPricing==='function') renderPricing();
       if(typeof updateHourlyDisp==='function') updateHourlyDisp();
+      if(typeof renderCustomTabs==='function') renderCustomTabs();
       if(typeof applyHero==='function') applyHero();
       if(typeof applyStats==='function') applyStats();
       if(typeof applySlogan==='function') applySlogan();
