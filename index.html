@@ -545,7 +545,7 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
 
 <div class="slogan-bar">💡 والدین هوشمند = فرزند توانمند &nbsp;|&nbsp; هر روز یک تجربه جدید، هر کودک یک ستاره در خانه بازی نوژین همدان 💖</div>
 
-<div class="cat-nav" id="main" id="catNav">
+<div class="cat-nav" id="main">
   <button class="cat-tab active" onclick="showCat('classes')">🎨 کلاس‌ها</button>
   <button class="cat-tab" onclick="showCat('reserve')">📅 رزرو خدمات</button>
   <button class="cat-tab" onclick="showCat('about')">📖 درباره کلاس‌ها</button>
@@ -1091,9 +1091,7 @@ const S = {
   sloganBar:'💡 والدین هوشمند = فرزند توانمند \u00a0|\u00a0 هر روز یک تجربه جدید، هر کودک یک ستاره در خانه بازی نوژین همدان 💖',
   workHours:'شنبه تا پنج‌شنبه — ۵ عصر تا ۸ شب (جمعه تعطیل)',
   social: { insta:'khane_bazi_nozhin', waNum:'989188137985' },
-  extraClasses: [
-    {id:'workshop-mother-child',n:'کارگاه مادر و کودک',e:'👩‍👧',t:'ct3',a:'همه سنین',d:'اعلام می‌شود',sessions:[{time:'اعلام می‌شود',capKey:'workshop-mother-child-1'}],inst:'—',priceKey:'workshop_mother_child',monthlyPriceKey:'workshop_mother_child_m',desc:'کارگاه تخصصی مادر و کودک — فضایی برای تقویت ارتباط عاطفی و بازی مشترک مادر و فرزند. روز، ساعت و قیمت از پنل ادمین قابل تنظیم است.',custom:false,tabId:'workshops'}
-  ],
+  extraClasses: [],
   customTabs: [
     { id: 'workshops', label: '🛠 کارگاه‌ها', icon: '🛠', order: 1 }
   ],
@@ -1188,7 +1186,12 @@ const S = {
     if(data.classOverrides) Object.assign(this.classOverrides, data.classOverrides);
     if(Array.isArray(data.deletedBaseClasses)) this.deletedBaseClasses=data.deletedBaseClasses;
     if(Array.isArray(data.gallery)) this.gallery=data.gallery;
-    if(Array.isArray(data.customTabs)) this.customTabs=data.customTabs;
+    if(Array.isArray(data.customTabs) && data.customTabs.length>0) this.customTabs=data.customTabs;
+    else if(Array.isArray(data.customTabs) && data.customTabs.length===0){
+      // Firebase returned empty array — keep default tabs (workshops)
+      // only clear if we explicitly had tabs saved before
+      if(this.customTabs && this.customTabs.length===0) this.customTabs=data.customTabs;
+    }
     if(data.adminPass && typeof ADMIN_PASS_VAR!=='undefined') { try{ ADMIN_PASS_VAR=data.adminPass; }catch(e){} }
   }
 };
@@ -1231,7 +1234,12 @@ function getCD(){const _del=S.deletedBaseClasses||[];return[
    sessions:[{time:'۵ تا ۶:۳۰',capKey:'montessori-sun-1'},{time:'۵ تا ۶:۳۰',capKey:'montessori-tue-1'}],
    inst:'خانم خزاعی',priceKey:'montessori_2',monthlyPriceKey:'montessori_2_m',termLabel:'ترمی (۱۲ جلسه)',
    desc:'با الهام از روش علمی دکتر ماریا مونته‌سوری، کودکان در محیطی آماده و هدفمند، آزادانه کشف می‌کنند و می‌آموزند. پژوهش‌های دانشگاهی نشان می‌دهد کودکان مونته‌سوری در مهارت‌های اجرایی، حافظه کوتاه‌مدت، درک اجتماعی و خلاقیت به‌طور چشمگیری از همسالان خود پیشی می‌گیرند — و این مزیت تا سال‌های آینده ادامه می‌یابد.'},
-  ...S.extraClasses.filter(c=>c.id!=='montessori-sat-wed'&&c.id!=='montessori-sun-tue')].filter(c=>!_del.includes(c.id)).map(c=>{
+  {id:'workshop-mother-child',n:'کارگاه مادر و کودک',e:'👩‍👧',t:'ct3',a:'همه سنین',d:'اعلام می‌شود',
+   sessions:[{time:'اعلام می‌شود',capKey:'workshop-mother-child-1'}],
+   inst:'—',priceKey:'workshop_mother_child',monthlyPriceKey:'workshop_mother_child_m',
+   tabId:'workshops',
+   desc:'کارگاه تخصصی مادر و کودک — فضایی برای تقویت ارتباط عاطفی و بازی مشترک مادر و فرزند. روز، ساعت و قیمت از پنل ادمین قابل تنظیم است.'},
+  ...S.extraClasses.filter(c=>c.id!=='montessori-sat-wed'&&c.id!=='montessori-sun-tue'&&c.id!=='workshop-mother-child')].filter(c=>!_del.includes(c.id)).map(c=>{
     // merge tabId from classOverrides for base classes
     const ov=S.classOverrides[c.id];
     if(ov&&ov.tabId!==undefined&&c.tabId===undefined) c.tabId=ov.tabId;
@@ -2009,7 +2017,7 @@ function addNewClass(){
   showToast('✅ کلاس «'+name+'» اضافه شد!');
 }
 // کلاس‌های پایه که hardcode هستن
-const BASE_CLASS_IDS=['kollazh','rhythm-mon','ballet','rhythm-wed','theater','acting','montessori-sat-wed','montessori-sun-tue'];
+const BASE_CLASS_IDS=['kollazh','rhythm-mon','ballet','rhythm-wed','theater','acting','montessori-sat-wed','montessori-sun-tue','workshop-mother-child'];
 
 function buildDeleteClassList(){
   const all=getCD();
@@ -2345,7 +2353,7 @@ document.addEventListener('click',e=>{const w=document.getElementById('calWrap')
 // ===== CUSTOM TABS (admin-managed) =====
 function renderCustomTabs(){
   const tabs=S.customTabs||[];
-  const catNav=document.getElementById('catNav')||document.querySelector('.cat-nav');
+  const catNav=document.querySelector('.cat-nav');
   
   // Remove old custom tab buttons
   catNav.querySelectorAll('.cat-tab[data-custom]').forEach(b=>b.remove());
@@ -2437,6 +2445,7 @@ function renderClassCard(c){
 }
 
 
+function showCat(id){
   document.querySelectorAll('.cat-section').forEach(s=>s.classList.remove('visible'));
   document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active'));
   const target=document.getElementById('cat-'+id);
