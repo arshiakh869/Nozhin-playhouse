@@ -1355,7 +1355,7 @@ function renderRegContent(){
       cont.innerHTML='<div class="reg-empty">📭 '+(currentRegTab==='pending'?'هیچ رزروی در انتظار تایید نیست':'هنوز هیچ ثبت‌نامی وجود ندارد')+'</div>';
     } else {
       const delAllBtn=`<button onclick="deleteAllRegistrations('${currentRegTab}')" style="margin-bottom:12px;background:rgba(255,93,162,.1);border:1.5px solid var(--red);color:var(--red);border-radius:10px;padding:7px 18px;font-family:\'Vazirmatn\',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;">🗑 حذف همه</button>`;
-      cont.innerHTML=delAllBtn+'<div style="overflow-x:auto"><table class="reg-table"><thead><tr><th>#</th><th>کلاس / خدمت</th><th>نام والد</th><th>موبایل</th><th>نام کودک</th><th>وضعیت</th><th>فیش</th><th>عملیات</th></tr></thead><tbody>'+
+      cont.innerHTML=delAllBtn+'<div style="overflow-x:auto"><table class="reg-table"><thead><tr><th>#</th><th>کلاس / خدمت</th><th>نام والد</th><th>موبایل</th><th>نام کودک</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>'+
       list.map((r,i)=>'<tr style="'+(r.cancelled?'opacity:.6':'')+'">'
         +'<td>'+fa(i+1)+'</td>'
         +'<td>'+r.type+(r.sessionTime?' <span style="color:var(--g4);font-size:.72rem">('+r.sessionTime+')</span>':'')+'</td>'
@@ -1364,10 +1364,10 @@ function renderRegContent(){
         +'<td>'+(r.child||'—')+'</td>'
         +'<td><span class="reg-badge '+(r.cancelled?'pending':r.confirmed?'confirmed':'pending')+'" style="'+(r.cancelled?'background:var(--g2);color:var(--g6)':'')+'">'+
           (r.cancelled?'🚫 لغوشده':r.confirmed?'✅ تایید شده':'⏳ در انتظار')+'</span></td>'
-        +'<td>'+(r.receipt?`<a href="${r.receipt}" target="_blank" style="color:var(--blue);font-size:.82rem;font-weight:700">🧾 فیش</a>`:'—')+'</td>'
-        +'<td style="display:flex;gap:4px;flex-wrap:wrap;padding:6px 4px;">'
+        +'<td style="display:flex;gap:4px;flex-wrap:wrap;padding:6px 4px;align-items:center;">'
           +(r.cancelled||r.confirmed?'':`<button class="reg-confirm-btn" onclick="confirmReg('${r.id}')">✅ تایید</button>`)
           +(r.cancelled||r.confirmed?'':` <button onclick="cancelReg('${r.id}')" style="background:rgba(139,115,152,.13);border:1.5px solid var(--g4);color:var(--g6);border-radius:8px;padding:4px 10px;font-family:\'Vazirmatn\',sans-serif;font-size:.75rem;font-weight:700;cursor:pointer;">🚫 لغو</button>`)
+          +(r.receipt?` <a href="${r.receipt}" target="_blank" style="background:rgba(108,74,182,.1);border:1.5px solid var(--lb);color:var(--blue);border-radius:8px;padding:4px 10px;font-size:.75rem;font-weight:700;text-decoration:none;">🧾 فیش</a>`:'')
           +` <button onclick="deleteReg('${r.id}')" style="background:rgba(255,93,162,.1);border:1.5px solid var(--red);color:var(--red);border-radius:8px;padding:4px 10px;font-family:\'Vazirmatn\',sans-serif;font-size:.75rem;font-weight:700;cursor:pointer;">🗑</button>`
         +'</td></tr>').join('')+
       '</tbody></table></div>';
