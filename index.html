@@ -720,20 +720,8 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
       </div>
       <div class="fr">
         <div class="fg"><label>سن کودک</label><select class="fc" id="fag"><option>۱ تا ۲ سال</option><option>۲ تا ۴ سال</option><option>۴ تا ۶ سال</option><option>۶ تا ۸ سال</option><option>۸ تا ۱۳ سال</option></select></div>
-        <div class="fg">
-          <label>تاریخ دلخواه</label>
-          <input class="fc" id="fdt" placeholder="انتخاب تاریخ شمسی..." readonly onclick="toggleCal()" style="cursor:pointer">
-          <div class="cal-wrap" id="calWrap">
-            <div class="cal-head">
-              <button class="cal-nav" onclick="chM(-1)">›</button>
-              <span class="cal-mon" id="calT"></span>
-              <button class="cal-nav" onclick="chM(1)">‹</button>
-            </div>
-            <div class="cal-dh"><span>ش</span><span>ی</span><span>د</span><span>س</span><span>چ</span><span>پ</span><span>ج</span></div>
-            <div class="cal-grid" id="calG"></div>
-          </div>
-        </div>
       </div>
+      <input type="hidden" id="fdt" value="">
       <div id="fsessWrap" class="fg" style="display:none">
         <label>ساعت جلسه</label>
         <select class="fc" id="fsess"></select>
@@ -748,9 +736,8 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
       <button class="btn-next" onclick="goS2()">ادامه — مشاهده اطلاعات پرداخت ←</button>
     </div>
     <div id="s2" style="display:none">
-    <div class="res-confirmed-badge" id="confirmedBadge"><div class="cb-ico">✅</div><div class="cb-title">رزرو تایید شده است!</div><div class="cb-sub">رزرو شما توسط خانه بازی نوژین تایید شد</div></div>
       <div class="mhead">
-        <div><div class="mslbl">مرحله ۲ از ۲</div><div class="mtitle">اطلاعات پرداخت</div></div>
+        <div><div class="mslbl">مرحله ۲ از ۳</div><div class="mtitle">اطلاعات پرداخت</div></div>
         <button class="mclose" onclick="closeModal()">✕</button>
       </div>
       <div id="pamtbox-wrap" style="display:flex"><div class="pamtbox"><span class="lbl">مبلغ قابل پرداخت</span><span class="amt" id="pAmt"></span></div></div>
@@ -763,17 +750,28 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
           <button class="btn-copy" onclick="copyCard()">📋 کپی شماره کارت</button>
         </div>
       </div>
-      <div id="paynote-wrap"><div class="paynote">✅ پس از واریز، عکس رسید را به همراه <strong>نام کودک</strong> و <strong>تاریخ رزرو</strong> در واتساپ، تلگرام یا بله ارسال کنید.</div></div>
-      <div id="paybtns-wrap">
-        <div class="paybtns">
-          <a id="waL" href="#" target="_blank" class="btn-wa">💬 واتساپ</a>
-          <a id="tgL" href="#" target="_blank" class="btn-tg">✈️ تلگرام</a>
-          <a id="baleL" href="#" target="_blank" class="btn-bale">🔵 بله</a>
+      <div id="paynote-wrap"><div class="paynote">✅ مبلغ را واریز کنید، سپس در مرحله بعد فیش را آپلود کنید.</div></div>
+      <button class="btn-next" onclick="goS3()" style="margin-top:12px">ادامه — آپلود فیش واریزی ←</button>
+      <button class="btn-back" onclick="goS1()">← بازگشت و ویرایش اطلاعات</button>
+    </div>
+
+    <div id="s3" style="display:none">
+      <div class="res-confirmed-badge" id="confirmedBadge"><div class="cb-ico">✅</div><div class="cb-title">رزرو تایید شده است!</div><div class="cb-sub">رزرو شما توسط خانه بازی نوژین تایید شد</div></div>
+      <div class="mhead">
+        <div><div class="mslbl">مرحله ۳ از ۳</div><div class="mtitle">آپلود فیش واریزی</div></div>
+        <button class="mclose" onclick="closeModal()">✕</button>
+      </div>
+      <div class="fnote" style="margin-bottom:14px;">📎 عکس فیش واریزی خود را آپلود کنید تا رزرو شما تکمیل و در لیست انتظار تایید قرار گیرد.</div>
+      <div class="fg" style="margin-bottom:12px;">
+        <label>فیش واریزی</label>
+        <input type="file" id="receiptFile" accept="image/*" class="fc" style="padding:10px;cursor:pointer;" onchange="previewReceipt(this)">
+        <div id="receiptPreviewWrap" style="display:none;margin-top:10px;border-radius:12px;overflow:hidden;border:1.5px solid var(--g2);max-height:220px;">
+          <img id="receiptPreviewImg" style="width:100%;height:220px;object-fit:contain;background:#f8f4ff;" src="" alt="پیش‌نمایش فیش">
         </div>
       </div>
-      <div class="payfooter" id="pendingFooter">⏱ تأیید رزرو حداکثر ظرف ۲ ساعت ارسال می‌شود</div>
+      <button class="btn-next" id="submitResBtnS3" onclick="submitWithReceipt()">✅ تکمیل رزرو</button>
+      <div class="payfooter" id="pendingFooter">⏱ پس از آپلود فیش، رزرو شما در صف انتظار تایید قرار می‌گیرد</div>
       <div id="adminConfirmWrap" style="display:none;margin-top:12px;"><button class="reg-confirm-btn" style="width:100%;padding:10px;font-size:.85rem;" onclick="adminConfirmCurrent()">✅ تایید رزرو (فقط ادمین)</button></div>
-      <button class="btn-back" onclick="goS1()">← بازگشت و ویرایش اطلاعات</button>
     </div>
   </div>
 </div>
@@ -1068,6 +1066,7 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
     <div class="reg-tabs">
       <button class="reg-tab active" onclick="switchRegTab('pending',this)">⏳ در انتظار تایید <span id="pendingCount" class="reg-count"></span></button>
       <button class="reg-tab" onclick="switchRegTab('confirmed',this)">✅ تایید‌شده‌ها <span id="confirmedCount" class="reg-count confirmed"></span></button>
+      <button class="reg-tab" onclick="switchRegTab('cancelled',this)">🚫 لغوشده‌ها</button>
       <button class="reg-tab" onclick="switchRegTab('all',this)">📋 همه رزروها</button>
     </div>
     <div id="regContent"></div>
@@ -1240,9 +1239,17 @@ function getCD(){const _del=S.deletedBaseClasses||[];return[
    tabId:'workshops',
    desc:'کارگاه تخصصی مادر و کودک — فضایی برای تقویت ارتباط عاطفی و بازی مشترک مادر و فرزند. روز، ساعت و قیمت از پنل ادمین قابل تنظیم است.'},
   ...S.extraClasses.filter(c=>c.id!=='montessori-sat-wed'&&c.id!=='montessori-sun-tue'&&c.id!=='workshop-mother-child')].filter(c=>!_del.includes(c.id)).map(c=>{
-    // merge tabId from classOverrides for base classes
+    // merge classOverrides for all classes
     const ov=S.classOverrides[c.id];
-    if(ov&&ov.tabId!==undefined&&c.tabId===undefined) c.tabId=ov.tabId;
+    if(ov){
+      if(ov.tabId!==undefined&&c.tabId===undefined) c.tabId=ov.tabId;
+      if(ov.day) c.d=ov.day;
+      if(ov.name) c.n=ov.name;
+      if(ov.emoji) c.e=ov.emoji;
+      if(ov.age) c.a=ov.age;
+      if(ov.inst) c.inst=ov.inst;
+      if(ov.desc) c.desc=ov.desc;
+    }
     return c;
   });
 }
@@ -1297,8 +1304,9 @@ function openRegs(){
 }
 function renderRegContent(){
   const cont=document.getElementById('regContent');
-  const pending=registrations.filter(r=>!r.confirmed);
+  const pending=registrations.filter(r=>!r.confirmed&&!r.cancelled);
   const confirmed=registrations.filter(r=>r.confirmed);
+  const cancelled=registrations.filter(r=>r.cancelled&&!r.confirmed);
   // update counts
   const pc=document.getElementById('pendingCount');
   const cc=document.getElementById('confirmedCount');
@@ -1308,7 +1316,8 @@ function renderRegContent(){
     if(confirmed.length===0){
       cont.innerHTML='<div class="reg-empty">✅ هنوز رزروی تایید نشده است</div>';
     } else {
-      cont.innerHTML=confirmed.map(r=>`
+      cont.innerHTML=`<button onclick="deleteAllRegistrations('confirmed')" style="margin-bottom:12px;background:rgba(255,93,162,.1);border:1.5px solid var(--red);color:var(--red);border-radius:10px;padding:7px 18px;font-family:\'Vazirmatn\',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;">🗑 حذف همه تایید‌شده‌ها</button>`+
+      confirmed.map(r=>`
         <div class="conf-card">
           <div class="conf-card-head">
             <span class="conf-class-tag">✅ ${r.type}</span>
@@ -1320,6 +1329,24 @@ function renderRegContent(){
           <div class="conf-field"><strong>سن</strong><span>${r.age}</span></div>
           ${r.sessionTime?`<div class="conf-field"><strong>ساعت جلسه</strong><span>${r.sessionTime}</span></div>`:''}
           ${r.note?`<div class="conf-field" style="grid-column:1/-1"><strong>یادداشت</strong><span>${r.note}</span></div>`:''}
+          ${r.receipt?`<div class="conf-field" style="grid-column:1/-1"><strong>فیش واریزی</strong><a href="${r.receipt}" target="_blank" style="color:var(--blue);font-weight:700;font-size:.82rem;">🧾 مشاهده فیش</a></div>`:''}
+          <div style="margin-top:8px;text-align:left"><button onclick="deleteReg('${r.id}')" style="background:rgba(255,93,162,.1);border:1.5px solid var(--red);color:var(--red);border-radius:8px;padding:5px 14px;font-family:\'Vazirmatn\',sans-serif;font-size:.75rem;font-weight:700;cursor:pointer;">🗑 حذف</button></div>
+        </div>`).join('');
+    }
+  } else if(currentRegTab==='cancelled'){
+    if(cancelled.length===0){
+      cont.innerHTML='<div class="reg-empty">هیچ رزرو لغوشده‌ای وجود ندارد</div>';
+    } else {
+      cont.innerHTML=`<button onclick="deleteAllRegistrations('cancelled')" style="margin-bottom:12px;background:rgba(255,93,162,.1);border:1.5px solid var(--red);color:var(--red);border-radius:10px;padding:7px 18px;font-family:\'Vazirmatn\',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;">🗑 حذف همه لغوشده‌ها</button>`+
+      cancelled.map(r=>`
+        <div class="conf-card" style="border-color:var(--g2);opacity:.8">
+          <div class="conf-card-head">
+            <span class="conf-class-tag" style="background:rgba(139,115,152,.12);color:var(--g6)">🚫 ${r.type}</span>
+          </div>
+          <div class="conf-field"><strong>نام والد</strong><span>${r.parent}</span></div>
+          <div class="conf-field"><strong>موبایل</strong><span dir="ltr">${r.phone}</span></div>
+          ${r.receipt?`<div class="conf-field" style="grid-column:1/-1"><strong>فیش</strong><a href="${r.receipt}" target="_blank" style="color:var(--blue);font-weight:700;font-size:.82rem;">🧾 مشاهده</a></div>`:''}
+          <div style="margin-top:8px;text-align:left"><button onclick="deleteReg('${r.id}')" style="background:rgba(255,93,162,.1);border:1.5px solid var(--red);color:var(--red);border-radius:8px;padding:5px 14px;font-family:\'Vazirmatn\',sans-serif;font-size:.75rem;font-weight:700;cursor:pointer;">🗑 حذف</button></div>
         </div>`).join('');
     }
   } else {
@@ -1327,9 +1354,23 @@ function renderRegContent(){
     if(list.length===0){
       cont.innerHTML='<div class="reg-empty">📭 '+(currentRegTab==='pending'?'هیچ رزروی در انتظار تایید نیست':'هنوز هیچ ثبت‌نامی وجود ندارد')+'</div>';
     } else {
-      cont.innerHTML='<table class="reg-table"><thead><tr><th>#</th><th>کلاس / خدمت</th><th>نام والد</th><th>موبایل</th><th>نام کودک</th><th>تاریخ</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>'+
-      list.map((r,i)=>'<tr><td>'+fa(i+1)+'</td><td>'+r.type+(r.sessionTime?' <span style="color:var(--g4);font-size:.72rem">('+r.sessionTime+')</span>':'')+'</td><td>'+r.parent+'</td><td dir="ltr">'+r.phone+'</td><td>'+(r.child||'—')+'</td><td>'+(r.date||'—')+'</td><td><span class="reg-badge '+(r.confirmed?'confirmed':'pending')+'">'+(r.confirmed?'✅ تایید شده':'⏳ در انتظار')+'</span></td><td>'+(r.confirmed?'<span style="font-size:.72rem;color:var(--g4)">تایید شده</span>':'<button class="reg-confirm-btn" onclick="confirmReg(\''+r.id+'\')">✅ تایید</button>')+'</td></tr>').join('')+
-      '</tbody></table>';
+      const delAllBtn=`<button onclick="deleteAllRegistrations('${currentRegTab}')" style="margin-bottom:12px;background:rgba(255,93,162,.1);border:1.5px solid var(--red);color:var(--red);border-radius:10px;padding:7px 18px;font-family:\'Vazirmatn\',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;">🗑 حذف همه</button>`;
+      cont.innerHTML=delAllBtn+'<div style="overflow-x:auto"><table class="reg-table"><thead><tr><th>#</th><th>کلاس / خدمت</th><th>نام والد</th><th>موبایل</th><th>نام کودک</th><th>وضعیت</th><th>فیش</th><th>عملیات</th></tr></thead><tbody>'+
+      list.map((r,i)=>'<tr style="'+(r.cancelled?'opacity:.6':'')+'">'
+        +'<td>'+fa(i+1)+'</td>'
+        +'<td>'+r.type+(r.sessionTime?' <span style="color:var(--g4);font-size:.72rem">('+r.sessionTime+')</span>':'')+'</td>'
+        +'<td>'+r.parent+'</td>'
+        +'<td dir="ltr">'+r.phone+'</td>'
+        +'<td>'+(r.child||'—')+'</td>'
+        +'<td><span class="reg-badge '+(r.cancelled?'pending':r.confirmed?'confirmed':'pending')+'" style="'+(r.cancelled?'background:var(--g2);color:var(--g6)':'')+'">'+
+          (r.cancelled?'🚫 لغوشده':r.confirmed?'✅ تایید شده':'⏳ در انتظار')+'</span></td>'
+        +'<td>'+(r.receipt?`<a href="${r.receipt}" target="_blank" style="color:var(--blue);font-size:.82rem;font-weight:700">🧾 فیش</a>`:'—')+'</td>'
+        +'<td style="display:flex;gap:4px;flex-wrap:wrap;padding:6px 4px;">'
+          +(r.cancelled||r.confirmed?'':`<button class="reg-confirm-btn" onclick="confirmReg('${r.id}')">✅ تایید</button>`)
+          +(r.cancelled||r.confirmed?'':` <button onclick="cancelReg('${r.id}')" style="background:rgba(139,115,152,.13);border:1.5px solid var(--g4);color:var(--g6);border-radius:8px;padding:4px 10px;font-family:\'Vazirmatn\',sans-serif;font-size:.75rem;font-weight:700;cursor:pointer;">🚫 لغو</button>`)
+          +` <button onclick="deleteReg('${r.id}')" style="background:rgba(255,93,162,.1);border:1.5px solid var(--red);color:var(--red);border-radius:8px;padding:4px 10px;font-family:\'Vazirmatn\',sans-serif;font-size:.75rem;font-weight:700;cursor:pointer;">🗑</button>`
+        +'</td></tr>').join('')+
+      '</tbody></table></div>';
     }
   }
 }
@@ -1339,6 +1380,7 @@ function confirmReg(id){
   const reg=registrations.find(r=>r.id===id);
   if(reg){
     reg.confirmed=true;
+    reg.cancelled=false;
     // Bump class capacity for the booked session, once only
     if(reg.capKey && !reg.capacityApplied){
       const cap=S.caps[reg.capKey];
@@ -1354,10 +1396,48 @@ function confirmReg(id){
       }
     }
     showToast('✅ رزرو '+reg.parent+' تایید شد!');
-    if(window._FB) window._FB.updateRegistration(id, {confirmed:true, capacityApplied:reg.capacityApplied||false});
+    if(window._FB) window._FB.updateRegistration(id, {confirmed:true,cancelled:false,capacityApplied:reg.capacityApplied||false});
   }
   renderRegContent();
   if(id===currentRegId)showConfirmedBadge();
+}
+function cancelReg(id){
+  const reg=registrations.find(r=>r.id===id);
+  if(!reg) return;
+  if(!confirm('آیا می‌خواهید این رزرو را لغو کنید؟')) return;
+  reg.cancelled=true;
+  reg.confirmed=false;
+  if(window._FB) window._FB.updateRegistration(id,{cancelled:true,confirmed:false});
+  showToast('🚫 رزرو '+reg.parent+' لغو شد');
+  renderRegContent();
+}
+function deleteReg(id){
+  if(!confirm('آیا مطمئن هستید؟ این رزرو حذف خواهد شد.')) return;
+  const idx=registrations.findIndex(r=>r.id===id);
+  if(idx===-1) return;
+  registrations.splice(idx,1);
+  if(window._FB) window._FB.deleteRegistration(id);
+  showToast('🗑 رزرو حذف شد');
+  renderRegContent();
+}
+function deleteAllRegistrations(scope){
+  let msg='آیا می‌خواهید همه رزروها را حذف کنید؟';
+  if(scope==='confirmed') msg='آیا می‌خواهید همه رزروهای تایید‌شده را حذف کنید؟';
+  else if(scope==='cancelled') msg='آیا می‌خواهید همه رزروهای لغوشده را حذف کنید؟';
+  else if(scope==='pending') msg='آیا می‌خواهید همه رزروهای در انتظار را حذف کنید؟';
+  if(!confirm(msg)) return;
+  let toDelete;
+  if(scope==='confirmed') toDelete=registrations.filter(r=>r.confirmed);
+  else if(scope==='cancelled') toDelete=registrations.filter(r=>r.cancelled&&!r.confirmed);
+  else if(scope==='pending') toDelete=registrations.filter(r=>!r.confirmed&&!r.cancelled);
+  else toDelete=[...registrations];
+  toDelete.forEach(r=>{
+    const idx=registrations.findIndex(x=>x.id===r.id);
+    if(idx!==-1) registrations.splice(idx,1);
+    if(window._FB) window._FB.deleteRegistration(r.id);
+  });
+  showToast('🗑 '+toDelete.length+' رزرو حذف شد');
+  renderRegContent();
 }
 function adminConfirmCurrent(){if(currentRegId)confirmReg(currentRegId);}
 function showConfirmedBadge(){
@@ -1547,16 +1627,30 @@ function openModal(type,price){
 }
 function closeModal(){document.getElementById('modal').classList.remove('open');}
 document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal();});
-function goS1(){document.getElementById('s1').style.display='block';document.getElementById('s2').style.display='none';}
+function goS1(){
+  document.getElementById('s1').style.display='block';
+  document.getElementById('s2').style.display='none';
+  document.getElementById('s3').style.display='none';
+}
+function previewReceipt(input){
+  if(input.files&&input.files[0]){
+    const reader=new FileReader();
+    reader.onload=e=>{
+      document.getElementById('receiptPreviewImg').src=e.target.result;
+      document.getElementById('receiptPreviewWrap').style.display='block';
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+// Step 2: show card info, collect registration data
+let _pendingReg=null;
 function goS2(){
   const p=document.getElementById('fp').value,ph=document.getElementById('fph').value;
   if(!p||!ph){showToast('⚠️ نام و شماره موبایل الزامی است');return;}
-  const ch=document.getElementById('fch').value,dt=document.getElementById('fdt').value;
+  const ch=document.getElementById('fch').value;
   const fr=document.getElementById('ffr').value,to=document.getElementById('fto').value;
   const showT=curT.includes('نگهداری')||curT.includes('تولد');
-  const tstr=showT?`\nساعت: از ${fr} تا ${to}`:'';
-  const amtStr=curP?curP+' تومان':'پس از هماهنگی';
-  // Determine which class session (capKey) this registration belongs to, for capacity tracking
+  // Determine which class session (capKey) this registration belongs to
   const mc=window._curMatchedClass;
   let capKey=null,sessionTime='';
   if(mc){
@@ -1572,29 +1666,16 @@ function goS2(){
       sessionTime=mc.sessions[0].time;
     }
   }
-  const sessStr=sessionTime?`\nساعت جلسه: ${sessionTime}`:'';
-  const msg=encodeURIComponent(`رسید پرداخت رزرو خانه بازی نوژین\nنوع: ${curT}\nنام والد: ${p}\nنام کودک: ${ch}\nتاریخ: ${dt}${sessStr}${tstr}\nمبلغ: ${amtStr}`);
-  const phone=S.social&&S.social.waNum?S.social.waNum:'989188137985';
-  document.getElementById('waL').href=`https://wa.me/${phone}?text=${msg}`;
-  document.getElementById('tgL').href=`https://t.me/${phone}?text=${msg}`;
-  document.getElementById('baleL').href=`https://ble.ir/msg/${phone}?text=${msg}`;
+  // Store pending reg info (not saved yet — wait for receipt)
+  _pendingReg={type:curT,parent:p,phone:ph,child:ch,age:document.getElementById('fag').value,
+    note:document.getElementById('fnt').value,capKey,sessionTime,
+    timeFrom:showT?fr:'',timeTo:showT?to:'',ts:Date.now()};
   document.getElementById('cardNumDisp').textContent=S.card.num;
   document.getElementById('cardOwnerDisp').textContent=S.card.owner;
-  // Save registration
-  const regId='reg-'+Date.now();
-  currentRegId=regId;
-  const ch2=document.getElementById('fch').value;
-  const newReg={id:regId,type:curT,parent:p,phone:ph,child:ch2,age:document.getElementById('fag').value,date:dt,note:document.getElementById('fnt').value,capKey,sessionTime,confirmed:false,capacityApplied:false,ts:Date.now()};
-  registrations.unshift(newReg);
-  if(window._FB) window._FB.saveRegistration(newReg);
-  document.getElementById('adminConfirmWrap').style.display=adminAuthed?'block':'none';
-  document.getElementById('confirmedBadge').style.display='none';
-  document.getElementById('pendingFooter').style.display='block';
   // Handle full class — hide payment, show full notice
   const isFull=window._curClassFull===true;
   document.getElementById('cardbox-wrap').style.display=isFull?'none':'block';
   document.getElementById('paynote-wrap').style.display=isFull?'none':'block';
-  document.getElementById('paybtns-wrap').style.display=isFull?'none':'block';
   document.getElementById('pamtbox-wrap').style.display=isFull?'none':'flex';
   let fullNotice=document.getElementById('fullCapNotice');
   if(!fullNotice){
@@ -1611,6 +1692,58 @@ function goS2(){
   fullNotice.style.display=isFull?'block':'none';
   document.getElementById('s1').style.display='none';
   document.getElementById('s2').style.display='block';
+  document.getElementById('s3').style.display='none';
+}
+// Step 3: upload receipt and submit
+function goS3(){
+  document.getElementById('s1').style.display='none';
+  document.getElementById('s2').style.display='none';
+  document.getElementById('s3').style.display='block';
+  document.getElementById('confirmedBadge').style.display='none';
+  document.getElementById('pendingFooter').style.display='block';
+  document.getElementById('adminConfirmWrap').style.display='none';
+  // Reset receipt input
+  document.getElementById('receiptFile').value='';
+  document.getElementById('receiptPreviewWrap').style.display='none';
+}
+function submitWithReceipt(){
+  const fileInput=document.getElementById('receiptFile');
+  if(!fileInput.files||!fileInput.files[0]){showToast('⚠️ لطفاً فیش واریزی را آپلود کنید');return;}
+  const btn=document.getElementById('submitResBtnS3');
+  btn.disabled=true;btn.textContent='در حال ارسال...';
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const receiptData=e.target.result; // base64
+    const regId='reg-'+Date.now();
+    currentRegId=regId;
+    const newReg={
+      id:regId,
+      type:_pendingReg.type,
+      parent:_pendingReg.parent,
+      phone:_pendingReg.phone,
+      child:_pendingReg.child,
+      age:_pendingReg.age,
+      date:'',
+      note:_pendingReg.note,
+      capKey:_pendingReg.capKey,
+      sessionTime:_pendingReg.sessionTime,
+      timeFrom:_pendingReg.timeFrom,
+      timeTo:_pendingReg.timeTo,
+      receipt:receiptData,
+      confirmed:false,
+      cancelled:false,
+      capacityApplied:false,
+      ts:_pendingReg.ts
+    };
+    registrations.unshift(newReg);
+    if(window._FB) window._FB.saveRegistration(newReg);
+    document.getElementById('adminConfirmWrap').style.display=adminAuthed?'block':'none';
+    document.getElementById('confirmedBadge').style.display='none';
+    document.getElementById('pendingFooter').style.display='block';
+    btn.disabled=false;btn.textContent='✅ تکمیل رزرو';
+    showToast('✅ رزرو شما ثبت شد و در انتظار تایید است');
+  };
+  reader.readAsDataURL(fileInput.files[0]);
 }
 function copyCard(){navigator.clipboard.writeText(S.card.num).then(()=>showToast('✅ شماره کارت کپی شد!'));}
 
@@ -1921,19 +2054,34 @@ function applyContactInfo(){
 // ===== CLASS EDITOR =====
 function buildClassEditControls(){
   const cd=getCD();
-  document.getElementById('classEditList').innerHTML=cd.map((c,idx)=>`
+  const days=['شنبه','یک‌شنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنج‌شنبه'];
+  document.getElementById('classEditList').innerHTML=cd.map((c,idx)=>{
+    const ov=S.classOverrides[c.id]||{};
+    const curDay=ov.day||c.d;
+    const curAge=ov.age||c.a;
+    const curInst=ov.inst||c.inst;
+    const curName=ov.name||c.n;
+    const curEmoji=ov.emoji||c.e;
+    const curDesc=ov.desc||c.desc;
+    const dayOpts=days.map(d=>`<option ${d===curDay?'selected':''}>${d}</option>`).join('');
+    return `
     <div class="class-edit-card">
       <div class="ce-head">${c.e} ${c.n}</div>
       <div class="arow">
-        <div class="afield"><label>نام کلاس</label><input type="text" id="ce-name-${idx}" value="${c.n}"></div>
-        <div class="afield"><label>ایموجی</label><input type="text" id="ce-emoji-${idx}" value="${c.e}" maxlength="3"></div>
+        <div class="afield"><label>نام کلاس</label><input type="text" id="ce-name-${idx}" value="${curName}"></div>
+        <div class="afield"><label>ایموجی</label><input type="text" id="ce-emoji-${idx}" value="${curEmoji}" maxlength="3"></div>
       </div>
       <div class="arow">
-        <div class="afield"><label>بازه سنی</label><input type="text" id="ce-age-${idx}" value="${c.a}"></div>
-        <div class="afield"><label>نام مربی</label><input type="text" id="ce-inst-${idx}" value="${c.inst}"></div>
+        <div class="afield"><label>بازه سنی</label><input type="text" id="ce-age-${idx}" value="${curAge}"></div>
+        <div class="afield"><label>نام مربی</label><input type="text" id="ce-inst-${idx}" value="${curInst}"></div>
       </div>
-      <div class="afield" style="margin-bottom:8px"><label>توضیحات</label><textarea id="ce-desc-${idx}" rows="2" style="border:1.5px solid var(--g2);border-radius:10px;padding:9px 12px;font-family:'Vazirmatn',sans-serif;font-size:.83rem;width:100%;resize:vertical;outline:none;">${c.desc}</textarea></div>
-    </div>`).join('');
+      <div class="arow">
+        <div class="afield"><label>روز برگزاری</label><select class="fc" id="ce-day-${idx}">${dayOpts}</select></div>
+      </div>
+      <div class="afield" style="margin-bottom:8px"><label>توضیحات</label><textarea id="ce-desc-${idx}" rows="2" style="border:1.5px solid var(--g2);border-radius:10px;padding:9px 12px;font-family:'Vazirmatn',sans-serif;font-size:.83rem;width:100%;resize:vertical;outline:none;">${curDesc}</textarea></div>
+      <button onclick="deleteClassById('${c.id}')" style="width:100%;background:rgba(255,93,162,.08);border:1.5px solid var(--red);color:var(--red);border-radius:10px;padding:8px;font-family:'Vazirmatn',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;margin-top:2px;">🗑 حذف این کلاس</button>
+    </div>`;
+  }).join('');
 }
 function saveClassEdits(){
   const cd=getCD();
@@ -1943,11 +2091,33 @@ function saveClassEdits(){
     const ag=document.getElementById('ce-age-'+idx);
     const inst=document.getElementById('ce-inst-'+idx);
     const desc=document.getElementById('ce-desc-'+idx);
-    if(n) c.n=n.value;
-    if(em) c.e=em.value;
-    if(ag) c.a=ag.value;
-    if(inst) c.inst=inst.value;
-    if(desc) c.desc=desc.value;
+    const day=document.getElementById('ce-day-'+idx);
+    const isExtra=S.extraClasses.find(e=>e.id===c.id);
+    if(isExtra){
+      // Extra classes: edit in-place
+      if(n) isExtra.n=n.value;
+      if(em) isExtra.e=em.value;
+      if(ag) isExtra.a=ag.value;
+      if(inst) isExtra.inst=inst.value;
+      if(desc) isExtra.desc=desc.value;
+      if(day) isExtra.d=day.value;
+    } else {
+      // Base classes: store overrides
+      S.classOverrides[c.id]=S.classOverrides[c.id]||{};
+      if(n) S.classOverrides[c.id].name=n.value;
+      if(em) S.classOverrides[c.id].emoji=em.value;
+      if(ag) S.classOverrides[c.id].age=ag.value;
+      if(inst) S.classOverrides[c.id].inst=inst.value;
+      if(desc) S.classOverrides[c.id].desc=desc.value;
+      if(day) S.classOverrides[c.id].day=day.value;
+      // Apply to current class object for immediate re-render
+      if(n) c.n=n.value;
+      if(em) c.e=em.value;
+      if(ag) c.a=ag.value;
+      if(inst) c.inst=inst.value;
+      if(desc) c.desc=desc.value;
+      if(day) c.d=day.value;
+    }
   });
 }
 
@@ -2040,9 +2210,9 @@ function buildDeleteClassList(){
 }
 
 function deleteClassById(id){
+  if(!confirm('آیا می‌خواهید این کلاس را حذف کنید؟')) return;
   const isBase=BASE_CLASS_IDS.includes(id);
   if(isBase){
-    // حذف از کلاس‌های پایه — یه آرایه مخفی نگه‌داریم
     if(!S.deletedBaseClasses) S.deletedBaseClasses=[];
     if(!S.deletedBaseClasses.includes(id)) S.deletedBaseClasses.push(id);
   } else {
@@ -2050,13 +2220,13 @@ function deleteClassById(id){
     if(idx===-1) return;
     S.extraClasses.splice(idx,1);
   }
-  const name=getCD().find(c=>c.id===id)?.n||id;
   renderClasses();
   renderDetails();
+  buildClassEditControls();
   buildDeleteClassList();
   renderCustomTabs();
   S.save();
-  showToast('🗑 کلاس «'+name+'» حذف شد');
+  showToast('🗑 کلاس حذف شد');
 }
 
 // برای سازگاری با کد قدیمی
