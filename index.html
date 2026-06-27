@@ -1329,7 +1329,7 @@ function renderRegContent(){
           <div class="conf-field"><strong>سن</strong><span>${r.age}</span></div>
           ${r.sessionTime?`<div class="conf-field"><strong>ساعت جلسه</strong><span>${r.sessionTime}</span></div>`:''}
           ${r.note?`<div class="conf-field" style="grid-column:1/-1"><strong>یادداشت</strong><span>${r.note}</span></div>`:''}
-          ${r.receipt?`<div class="conf-field" style="grid-column:1/-1"><strong>فیش واریزی</strong><a href="${r.receipt}" target="_blank" style="color:var(--blue);font-weight:700;font-size:.82rem;">🧾 مشاهده فیش</a></div>`:''}
+          ${r.receipt?`<div class="conf-field" style="grid-column:1/-1"><strong>فیش واریزی</strong><button onclick="viewReceipt('${r.id}')" style="background:rgba(108,74,182,.1);border:1.5px solid var(--lb);color:var(--blue);border-radius:8px;padding:4px 12px;font-family:'Vazirmatn',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;">🧾 مشاهده فیش</button></div>`:''}
           <div style="margin-top:8px;text-align:left"><button onclick="deleteReg('${r.id}')" style="background:rgba(255,93,162,.1);border:1.5px solid var(--red);color:var(--red);border-radius:8px;padding:5px 14px;font-family:\'Vazirmatn\',sans-serif;font-size:.75rem;font-weight:700;cursor:pointer;">🗑 حذف</button></div>
         </div>`).join('');
     }
@@ -1345,7 +1345,7 @@ function renderRegContent(){
           </div>
           <div class="conf-field"><strong>نام والد</strong><span>${r.parent}</span></div>
           <div class="conf-field"><strong>موبایل</strong><span dir="ltr">${r.phone}</span></div>
-          ${r.receipt?`<div class="conf-field" style="grid-column:1/-1"><strong>فیش</strong><a href="${r.receipt}" target="_blank" style="color:var(--blue);font-weight:700;font-size:.82rem;">🧾 مشاهده</a></div>`:''}
+          ${r.receipt?`<div class="conf-field" style="grid-column:1/-1"><strong>فیش</strong><button onclick="viewReceipt('${r.id}')" style="background:rgba(108,74,182,.1);border:1.5px solid var(--lb);color:var(--blue);border-radius:8px;padding:4px 12px;font-family:'Vazirmatn',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;">🧾 مشاهده</button></div>`:''}
           <div style="margin-top:8px;text-align:left"><button onclick="deleteReg('${r.id}')" style="background:rgba(255,93,162,.1);border:1.5px solid var(--red);color:var(--red);border-radius:8px;padding:5px 14px;font-family:\'Vazirmatn\',sans-serif;font-size:.75rem;font-weight:700;cursor:pointer;">🗑 حذف</button></div>
         </div>`).join('');
     }
@@ -1367,7 +1367,7 @@ function renderRegContent(){
         +'<td style="display:flex;gap:4px;flex-wrap:wrap;padding:6px 4px;align-items:center;">'
           +(r.cancelled||r.confirmed?'':`<button class="reg-confirm-btn" onclick="confirmReg('${r.id}')">✅ تایید</button>`)
           +(r.cancelled||r.confirmed?'':` <button onclick="cancelReg('${r.id}')" style="background:rgba(139,115,152,.13);border:1.5px solid var(--g4);color:var(--g6);border-radius:8px;padding:4px 10px;font-family:\'Vazirmatn\',sans-serif;font-size:.75rem;font-weight:700;cursor:pointer;">🚫 لغو</button>`)
-          +(r.receipt?` <a href="${r.receipt}" target="_blank" style="background:rgba(108,74,182,.1);border:1.5px solid var(--lb);color:var(--blue);border-radius:8px;padding:4px 10px;font-size:.75rem;font-weight:700;text-decoration:none;">🧾 فیش</a>`:'')
+          +(r.receipt?` <button onclick="viewReceipt('${r.id}')" style="background:rgba(108,74,182,.1);border:1.5px solid var(--lb);color:var(--blue);border-radius:8px;padding:4px 10px;font-family:'Vazirmatn',sans-serif;font-size:.75rem;font-weight:700;cursor:pointer;">🧾 فیش</button>`:'')
           +` <button onclick="deleteReg('${r.id}')" style="background:rgba(255,93,162,.1);border:1.5px solid var(--red);color:var(--red);border-radius:8px;padding:4px 10px;font-family:\'Vazirmatn\',sans-serif;font-size:.75rem;font-weight:700;cursor:pointer;">🗑</button>`
         +'</td></tr>').join('')+
       '</tbody></table></div>';
@@ -1410,6 +1410,13 @@ function cancelReg(id){
   if(window._FB) window._FB.updateRegistration(id,{cancelled:true,confirmed:false});
   showToast('🚫 رزرو '+reg.parent+' لغو شد');
   renderRegContent();
+}
+function viewReceipt(id){
+  const reg=registrations.find(r=>r.id===id);
+  if(!reg||!reg.receipt) return;
+  const w=window.open('','_blank');
+  w.document.write('<html><head><title>فیش واریزی — '+reg.parent+'</title></head><body style="margin:0;background:#111;display:flex;justify-content:center;align-items:center;min-height:100vh;"><img src="'+reg.receipt+'" style="max-width:100%;max-height:100vh;object-fit:contain;"></body></html>');
+  w.document.close();
 }
 function deleteReg(id){
   if(!confirm('آیا مطمئن هستید؟ این رزرو حذف خواهد شد.')) return;
