@@ -339,7 +339,8 @@ nav{position:fixed;top:0;right:0;left:0;z-index:200;background:var(--blue);heigh
 .grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px;}
 .class-card{background:var(--white);border-radius:var(--rmd);border:1.5px solid var(--g2);overflow:hidden;transition:all .35s cubic-bezier(.34,1.56,.64,1);}
 .class-card:hover{box-shadow:var(--shmd);transform:translateY(-7px) rotate(-.6deg) scale(1.015);border-color:var(--lb);}
-.cctop{height:105px;display:flex;align-items:center;justify-content:center;font-size:2.6rem;position:relative;}
+.cctop{height:105px;display:flex;align-items:center;justify-content:center;font-size:2.6rem;position:relative;overflow:hidden;}
+.cctop span{position:relative;z-index:2;}
 .ct1{background:linear-gradient(135deg,#FFE3F1,#FFC2E2);}
 .ct2{background:linear-gradient(135deg,#ECE3FF,#D3C2FA);}
 .ct3{background:linear-gradient(135deg,#DEFBF2,#BBF0E0);}
@@ -556,6 +557,12 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
 /* Sched row */
 .sched-row{display:grid;grid-template-columns:160px 1fr;gap:8px;align-items:start;background:var(--g1);padding:9px 12px;border-radius:10px;margin-bottom:6px;}
 .sched-row label{font-size:.72rem;color:var(--g6);font-weight:700;display:block;margin-bottom:3px;}
+/* Class session editor: day chips + time */
+.ce-session-row{background:white;border:1.5px solid var(--g2);border-radius:10px;padding:10px 12px;margin-bottom:8px;}
+.ce-day-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.ce-day-chip{background:var(--g1);border:1.5px solid var(--g2);color:var(--g6);font-family:'Vazirmatn',sans-serif;font-size:.72rem;font-weight:600;padding:5px 12px;border-radius:50px;cursor:pointer;transition:all .15s;}
+.ce-day-chip.active{background:var(--blue);border-color:var(--blue);color:white;}
+.ce-day-chip:hover{border-color:var(--lb);}
 /* Reviews */
 .review-card{background:white;border-radius:16px;padding:18px 20px;border:1.5px solid var(--g2);box-shadow:var(--shsm);}
 .review-card .rv-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
@@ -894,7 +901,6 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
       <button class="atab" onclick="switchTab('tab-tabs')">📑 تب‌ها</button>
       <button class="atab" onclick="switchTab('tab-classes')">🎨 کلاس‌ها</button>
       <button class="atab" onclick="switchTab('tab-addclass')">➕ کلاس جدید</button>
-      <button class="atab" onclick="switchTab('tab-sched')">📅 برنامه</button>
       <button class="atab" onclick="switchTab('tab-cap')">🪑 ظرفیت</button>
       <button class="atab" onclick="switchTab('tab-prices')">💰 قیمت‌ها</button>
       <button class="atab" onclick="switchTab('tab-contact')">📞 تماس</button>
@@ -999,14 +1005,6 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
           </div>
         </div>
         <div class="arow">
-          <div class="afield"><label>روز برگزاری</label>
-            <select id="ncDay">
-              <option>شنبه</option><option>یک‌شنبه</option><option>دوشنبه</option>
-              <option>سه‌شنبه</option><option>چهارشنبه</option><option>پنج‌شنبه</option>
-            </select>
-          </div>
-        </div>
-        <div class="arow">
           <div class="afield"><label>بازه سنی</label><input type="text" id="ncAge" placeholder="مثلاً: ۳ تا ۸ سال"></div>
           <div class="afield"><label>نام مربی</label><input type="text" id="ncInst" placeholder="مثلاً: خانم احمدی"></div>
         </div>
@@ -1016,7 +1014,8 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
           <div class="afield"><label>قیمت ماهیانه (تومان — اختیاری)</label><input type="number" id="ncPriceM" placeholder="0 = غیرفعال"></div>
         </div>
         <div style="background:var(--g1);border-radius:12px;padding:14px;margin-bottom:12px;">
-          <div style="font-size:.8rem;font-weight:700;color:var(--blue);margin-bottom:10px">جلسات (ساعت‌ها)</div>
+          <div style="font-size:.8rem;font-weight:700;color:var(--blue);margin-bottom:4px">📅 روز و ساعت جلسات</div>
+          <div style="font-size:.7rem;color:var(--g4);margin-bottom:10px;line-height:1.7">برای هر جلسه، روز (یا چند روز) و ساعت را وارد کنید — مثلاً مونته‌سوری با یک‌شنبه و سه‌شنبه ساعت ۵ تا ۶:۳۰ در یک جلسه.</div>
           <div id="ncSessionsWrap"></div>
           <button type="button" onclick="addNcSession()" style="background:none;border:1.5px dashed var(--lb);color:var(--blue);padding:7px 18px;border-radius:50px;font-family:'Vazirmatn',sans-serif;font-size:.8rem;cursor:pointer;margin-top:6px;">+ افزودن جلسه</button>
         </div>
@@ -1024,17 +1023,24 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
           <div class="afield"><label>ظرفیت هر جلسه</label><input type="number" id="ncCap" placeholder="30" value="30"></div>
           <div class="afield"><label>ثبت‌نام‌های فعلی</label><input type="number" id="ncCur" placeholder="0" value="0"></div>
         </div>
+        <div style="background:var(--g1);border-radius:12px;padding:13px 14px;margin-bottom:12px;">
+          <div style="font-size:.8rem;font-weight:700;color:var(--blue);margin-bottom:8px">🖼 عکس کلاس (اختیاری — فقط یک عکس)</div>
+          <div id="ncImgPreviewWrap" style="display:none;margin-bottom:8px;">
+            <div style="position:relative;width:120px;height:90px;border-radius:10px;overflow:hidden;border:1.5px solid var(--g2);">
+              <img id="ncImgPreview" style="width:100%;height:100%;object-fit:cover;display:block;">
+              <button type="button" onclick="resetNcImage()" title="حذف عکس" style="position:absolute;top:3px;left:3px;background:rgba(220,50,50,.9);color:white;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:.7rem;line-height:1;">✕</button>
+            </div>
+          </div>
+          <input type="file" accept="image/*" id="ncImgFile" style="display:none" onchange="onNcImageSelected()">
+          <button type="button" onclick="document.getElementById('ncImgFile').click()" style="background:white;border:1.5px solid var(--g2);color:var(--blue);padding:7px 16px;border-radius:50px;font-family:'Vazirmatn',sans-serif;font-size:.78rem;cursor:pointer;">📷 انتخاب عکس</button>
+          <span id="ncImgStatus" style="font-size:.72rem;color:var(--g6);margin-right:6px;"></span>
+        </div>
         <button class="admin-save" style="margin-top:4px" onclick="addNewClass()">➕ افزودن کلاس</button>
       </div>
       <div class="asec">
         <h3>🗑 حذف کلاس</h3>
         <div id="deleteClassList"></div>
       </div>
-    </div>
-
-    <!-- TAB: SCHEDULE -->
-    <div class="atab-content" id="tab-sched" style="display:none">
-      <div class="asec"><h3>📅 روز و ساعت کلاس‌ها</h3><div id="schedControls"></div></div>
     </div>
 
     <!-- TAB: CAPACITY -->
@@ -1330,41 +1336,64 @@ function fmtPrice(n){return fa(Number(n).toLocaleString('en'));}
 function getPriceStr(key){return fmtPrice(S.prices[key]);}
 
 // ===== CLASS DATA =====
+// هر جلسه (session) حالا یک آرایه days دارد (یک یا چند روز) + یک ساعت. اگر چند روز با ساعت یکسان وارد شوند، در نمایش با "و" ترکیب می‌شوند.
+function dayLabel(days){
+  if(!days||days.length===0) return '';
+  if(days.length===1) return days[0];
+  return days.join(' و ');
+}
+// تابع کمکی: گروه‌بندی جلسات بر اساس ساعت یکسان و ترکیب روزها — مثلاً یکشنبه ساعت ۵ + سه‌شنبه ساعت ۵ => "یکشنبه و سه‌شنبه ساعت ۵"
+function mergeSessionsForDisplay(sessions){
+  const groups=[];
+  sessions.forEach(s=>{
+    const sdays=s.days||(s.day?[s.day]:[]);
+    const g=groups.find(g=>g.time===s.time);
+    if(g){ sdays.forEach(d=>{ if(!g.days.includes(d)) g.days.push(d); }); g.sessions.push(s); }
+    else groups.push({time:s.time,days:[...sdays],sessions:[s]});
+  });
+  return groups;
+}
+// روز کلی کلاس (برای نمایش روی کارت/برچسب) — ترکیب همه روزهای منحصر به فرد جلسات
+function classOverallDay(sessions){
+  const all=[];
+  sessions.forEach(s=>{ (s.days||(s.day?[s.day]:[])).forEach(d=>{ if(!all.includes(d)) all.push(d); }); });
+  return all.length?all.join(' و '):'اعلام می‌شود';
+}
 function getCD(){const _del=S.deletedBaseClasses||[];return[
-  {id:'kollazh',n:'نقاشی کلاژی',e:'🎨',t:'ct1',a:'۳ تا ۸ سال',d:'شنبه',sessions:[
-    {time:'۵ تا ۶',capKey:'kollazh-1'},{time:'۶ تا ۷',capKey:'kollazh-2'}],
+  {id:'kollazh',n:'نقاشی کلاژی',e:'🎨',t:'ct1',a:'۳ تا ۸ سال',sessions:[
+    {days:['شنبه'],time:'۵ تا ۶',capKey:'kollazh-1'},{days:['شنبه'],time:'۶ تا ۷',capKey:'kollazh-2'}],
     inst:'خانم قربانی چم',priceKey:'kollazh',monthlyPriceKey:'kollazh_m',
     desc:'کودکان با رنگ‌های شاد و مواد متنوع خلاقیت خود را شکوفا می‌کنند. ترکیبی از رنگ، کاغذ و مواد طبیعی که تخیل کودک را پرواز می‌دهد.'},
-  {id:'rhythm-mon',n:'ریتم و گیم',e:'🎵',t:'ct2',a:'۲.۵ تا ۷ سال',d:'یک‌شنبه',sessions:[
-    {time:'۵ تا ۶ (۲.۵-۴ سال)',capKey:'rhythm-mon-1'},{time:'۶ تا ۷ (۴-۷ سال)',capKey:'rhythm-mon-2'}],
+  {id:'rhythm-mon',n:'ریتم و گیم',e:'🎵',t:'ct2',a:'۲.۵ تا ۷ سال',sessions:[
+    {days:['یک‌شنبه'],time:'۵ تا ۶ (۲.۵-۴ سال)',capKey:'rhythm-mon-1'},{days:['یک‌شنبه'],time:'۶ تا ۷ (۴-۷ سال)',capKey:'rhythm-mon-2'}],
     inst:'خانم اشبه',priceKey:'rhythm',monthlyPriceKey:'rhythm_m',
     desc:'دنیایی شاد از موسیقی، حرکت و بازی. کودکان با آهنگ‌های کودکانه حس ریتم را درک و هماهنگی حرکتی را تجربه می‌کنند.'},
-  {id:'ballet',n:'باله',e:'🩰',t:'ct3',a:'۳ تا ۹ سال',d:'دوشنبه',sessions:[
-    {time:'۴:۳۰ تا ۵:۳۰',capKey:'ballet-1'},{time:'۶:۳۰',capKey:'ballet-2'}],
+  {id:'ballet',n:'باله',e:'🩰',t:'ct3',a:'۳ تا ۹ سال',sessions:[
+    {days:['دوشنبه'],time:'۴:۳۰ تا ۵:۳۰',capKey:'ballet-1'},{days:['دوشنبه'],time:'۶:۳۰',capKey:'ballet-2'}],
     inst:'خانم موسوی',priceKey:'ballet',monthlyPriceKey:'ballet_m',
     desc:'کودکان با ظرافت و زیبایی حرکت آشنا می‌شوند. هر گام اعتماد به نفس می‌سازد و انعطاف‌پذیری بدن را بالا می‌برد.'},
-  {id:'rhythm-wed',n:'ریتم و گیم + بازی شادی',e:'😊',t:'ct4',a:'۱ تا ۴ سال',d:'سه‌شنبه',sessions:[
-    {time:'۵ تا ۶ (۲.۵-۴ سال)',capKey:'rhythm-wed-1'},{time:'۶ تا ۷ (۱-۲ سال)',capKey:'rhythm-wed-2'}],
+  {id:'rhythm-wed',n:'ریتم و گیم + بازی شادی',e:'😊',t:'ct4',a:'۱ تا ۴ سال',sessions:[
+    {days:['سه‌شنبه'],time:'۵ تا ۶ (۲.۵-۴ سال)',capKey:'rhythm-wed-1'},{days:['سه‌شنبه'],time:'۶ تا ۷ (۱-۲ سال)',capKey:'rhythm-wed-2'}],
     inst:'خانم اشبه',priceKey:'rhythm',monthlyPriceKey:'rhythm_m',
     desc:'ترکیبی شاد از ریتم موسیقی و بازی‌های گروهی. در بازی شادی کوچک‌ترین بچه‌ها با دنیای اصوات و تعامل اجتماعی آشنا می‌شوند.'},
-  {id:'theater',n:'نمایش خلاق',e:'🎭',t:'ct5',a:'۳ تا ۸ سال',d:'چهارشنبه',sessions:[
-    {time:'۵ تا ۶',capKey:'theater-1'},{time:'۶ تا ۷',capKey:'theater-2'}],
+  {id:'theater',n:'نمایش خلاق',e:'🎭',t:'ct5',a:'۳ تا ۸ سال',sessions:[
+    {days:['چهارشنبه'],time:'۵ تا ۶',capKey:'theater-1'},{days:['چهارشنبه'],time:'۶ تا ۷',capKey:'theater-2'}],
     inst:'آقای ترابی',priceKey:'theater',monthlyPriceKey:'theater_m',
     desc:'داستان‌سرایی و تصویرسازی ذهنی که بیان وجودی و اعتماد به نفس کودک را می‌سازد.'},
-  {id:'acting',n:'بازیگری',e:'🎬',t:'ct6',a:'۶ تا ۱۳ سال',d:'چهارشنبه',sessions:[
-    {time:'۷ تا ۸',capKey:'acting-1'}],
+  {id:'acting',n:'بازیگری',e:'🎬',t:'ct6',a:'۶ تا ۱۳ سال',sessions:[
+    {days:['چهارشنبه'],time:'۷ تا ۸',capKey:'acting-1'}],
     inst:'آقای ترابی',priceKey:'acting',monthlyPriceKey:'acting_m',
     desc:'کلاس بازیگری برای نوجوانان با تکنیک‌های پیشرفته‌تر صحنه. تقویت بیان، حضور ذهن و هنر اجرا.'},
-  {id:'montessori-sat-wed',n:'مونته‌سوری',e:'🌱',t:'ct3',a:'۲ تا ۶ سال',d:'شنبه و چهارشنبه',
-   sessions:[{time:'۵ تا ۶:۳۰',capKey:'montessori-sat-1'},{time:'۵ تا ۶:۳۰',capKey:'montessori-wed-1'}],
+  {id:'montessori-sat-wed',n:'مونته‌سوری',e:'🌱',t:'ct3',a:'۲ تا ۶ سال',
+   sessions:[{days:['شنبه'],time:'۵ تا ۶:۳۰',capKey:'montessori-sat-1'},{days:['چهارشنبه'],time:'۵ تا ۶:۳۰',capKey:'montessori-wed-1'}],
    inst:'خانم یاوری',priceKey:'montessori_1',monthlyPriceKey:'montessori_1_m',termLabel:'ترمی (۱۲ جلسه)',
    desc:'با الهام از روش علمی دکتر ماریا مونته‌سوری، کودکان در محیطی آماده و هدفمند، آزادانه کشف می‌کنند و می‌آموزند. پژوهش‌های دانشگاهی نشان می‌دهد کودکان مونته‌سوری در مهارت‌های اجرایی، حافظه کوتاه‌مدت، درک اجتماعی و خلاقیت به‌طور چشمگیری از همسالان خود پیشی می‌گیرند — و این مزیت تا سال‌های آینده ادامه می‌یابد.'},
-  {id:'montessori-sun-tue',n:'مونته‌سوری',e:'🌱',t:'ct6',a:'۲ تا ۶ سال',d:'یک‌شنبه و سه‌شنبه',
-   sessions:[{time:'۵ تا ۶:۳۰',capKey:'montessori-sun-1'},{time:'۵ تا ۶:۳۰',capKey:'montessori-tue-1'}],
+  {id:'montessori-sun-tue',n:'مونته‌سوری',e:'🌱',t:'ct6',a:'۲ تا ۶ سال',
+   sessions:[{days:['یک‌شنبه'],time:'۵ تا ۶:۳۰',capKey:'montessori-sun-1'},{days:['سه‌شنبه'],time:'۵ تا ۶:۳۰',capKey:'montessori-tue-1'}],
    inst:'خانم خزاعی',priceKey:'montessori_2',monthlyPriceKey:'montessori_2_m',termLabel:'ترمی (۱۲ جلسه)',
    desc:'با الهام از روش علمی دکتر ماریا مونته‌سوری، کودکان در محیطی آماده و هدفمند، آزادانه کشف می‌کنند و می‌آموزند. پژوهش‌های دانشگاهی نشان می‌دهد کودکان مونته‌سوری در مهارت‌های اجرایی، حافظه کوتاه‌مدت، درک اجتماعی و خلاقیت به‌طور چشمگیری از همسالان خود پیشی می‌گیرند — و این مزیت تا سال‌های آینده ادامه می‌یابد.'},
-  {id:'workshop-mother-child',n:'کارگاه مادر و کودک',e:'👩‍👧',t:'ct3',a:'همه سنین',d:'اعلام می‌شود',
-   sessions:[{time:'اعلام می‌شود',capKey:'workshop-mother-child-1'}],
+  {id:'workshop-mother-child',n:'کارگاه مادر و کودک',e:'👩‍👧',t:'ct3',a:'همه سنین',
+   sessions:[{days:[],time:'اعلام می‌شود',capKey:'workshop-mother-child-1'}],
    inst:'—',priceKey:'workshop_mother_child',monthlyPriceKey:'workshop_mother_child_m',
    tabId:'workshops',
    desc:'کارگاه تخصصی مادر و کودک — فضایی برای تقویت ارتباط عاطفی و بازی مشترک مادر و فرزند. روز، ساعت و قیمت از پنل ادمین قابل تنظیم است.'},
@@ -1373,50 +1402,27 @@ function getCD(){const _del=S.deletedBaseClasses||[];return[
     const ov=S.classOverrides[c.id];
     if(ov){
       if(ov.tabId!==undefined) c.tabId=ov.tabId;
-      if(ov.day) c.d=ov.day;
       if(ov.name) c.n=ov.name;
       if(ov.emoji) c.e=ov.emoji;
       if(ov.age) c.a=ov.age;
       if(ov.inst) c.inst=ov.inst;
       if(ov.desc) c.desc=ov.desc;
+      if(ov.img!==undefined) c.img=ov.img;
+      if(Array.isArray(ov.sessions)&&ov.sessions.length){
+        // ov.sessions جایگزین کامل لیست جلسات پایه می‌شود (هر کدام capKey خودش را همراه دارد)
+        // به این ترتیب اگر ادمین ساعت یک روز را خالی بگذارد، آن جلسه کاملاً از کلاس حذف می‌شود
+        c.sessions=ov.sessions;
+      }
     }
+    // سازگاری با داده‌های قدیمی: اگر session هنوز فرمت day/d قدیمی دارد، تبدیل کن
+    c.sessions=c.sessions.map(s=>s.days?s:{...s,days:s.day?[s.day]:[]});
+    if(c.img===undefined) c.img=c.img||'';
+    // d محاسبه‌شده برای سازگاری با بقیه کد (نمایش روی کارت و جزئیات)
+    c.d=classOverallDay(c.sessions);
     return c;
   });
 }
 
-
-function buildSchedControls(){
-  const c=document.getElementById('schedControls');
-  c.innerHTML=getCD().map(cl=>{
-    const ov=S.classOverrides[cl.id]||{};
-    const days=['شنبه','یک‌شنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنج‌شنبه'];
-    const curDay=ov.day||cl.d;
-    const dayOpts=days.map(d=>`<option ${d===curDay?'selected':''}>${d}</option>`).join('');
-    const timesHtml=cl.sessions.map((s,i)=>{
-      const t=(ov.times&&ov.times[i])||s.time;
-      return `<div style="display:flex;gap:6px;align-items:center;margin-bottom:5px;"><span style="font-size:.7rem;color:var(--g6);">جلسه ${fa(i+1)}:</span><input class="fc" style="font-size:.75rem;padding:6px 9px;" id="sched-time-${cl.id}-${i}" value="${t}" placeholder="مثلاً ۵ تا ۶"></div>`;
-    }).join('');
-    return `<div style="border:1.5px solid var(--g2);border-radius:12px;padding:14px 16px;margin-bottom:10px;">
-      <div style="font-size:.82rem;font-weight:700;color:var(--blue);margin-bottom:10px;">${cl.e} ${cl.n}</div>
-      <div class="sched-row">
-        <div><label>روز برگزاری</label><select class="fc" id="sched-day-${cl.id}">${dayOpts}</select></div>
-        <div><label>ساعت جلسات</label>${timesHtml}</div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function saveSchedOverrides(){
-  getCD().forEach(cl=>{
-    S.classOverrides[cl.id]=S.classOverrides[cl.id]||{};
-    const dayEl=document.getElementById('sched-day-'+cl.id);
-    if(dayEl) S.classOverrides[cl.id].day=dayEl.value;
-    S.classOverrides[cl.id].times=cl.sessions.map((s,i)=>{
-      const el=document.getElementById('sched-time-'+cl.id+'-'+i);
-      return el?el.value:s.time;
-    });
-  });
-}
 
 let currentRegTab='pending';
 function switchRegTab(tab,el){
@@ -1593,16 +1599,20 @@ function renderClasses(){
     const monthlyPrice=hasMonthly?fmtPrice(rawMonthly):'';
     // check if ALL sessions of this class are full
     const allFull=c.sessions.every(s=>{ const cap=S.caps[s.capKey]; return cap && cap.cur>=cap.max; });
-    const sesHtml=c.sessions.map(s=>{
-      const cap=S.caps[s.capKey];
-      const _ov=S.classOverrides[c.id];
-      const _dispT=(_ov&&_ov.times&&_ov.times[c.sessions.indexOf(s)])||s.time;
-      const isFull=cap.cur>=cap.max;
-      const pct=Math.min(100,Math.round(cap.cur/cap.max*100));
+    // گروه‌بندی جلسات بر اساس ساعت یکسان تا روزهای هم‌ساعت با "و" ترکیب شوند
+    const groups=mergeSessionsForDisplay(c.sessions);
+    const sesHtml=groups.map(g=>{
+      // ظرفیت گروه: اگر چند جلسه در این گروه باشند (چند روز هم‌ساعت)، مجموع آن‌ها را نشان بده
+      const caps=g.sessions.map(s=>S.caps[s.capKey]).filter(Boolean);
+      const cur=caps.reduce((a,b)=>a+(b.cur||0),0);
+      const max=caps.reduce((a,b)=>a+(b.max||0),0)||1;
+      const isFull=cur>=max;
+      const pct=Math.min(100,Math.round(cur/max*100));
+      const dLabel=g.days.length?dayLabel(g.days)+' ساعت ':'';
       return `<div style="display:flex;align-items:center;gap:8px;font-size:.72rem;color:var(--g6);margin-bottom:4px;">
-        <span>🕐 ${_dispT}</span>
+        <span>🕐 ${dLabel}${g.time}</span>
         <div style="flex:1;height:5px;background:#eee;border-radius:5px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${isFull?'var(--red)':'linear-gradient(90deg,#6BCB77,var(--lb))'};border-radius:5px"></div></div>
-        <span style="color:${isFull?'var(--red)':'var(--g6)'};font-weight:700">${isFull?'🔴 پر':fa(cap.cur)+'/'+fa(cap.max)}</span>
+        <span style="color:${isFull?'var(--red)':'var(--g6)'};font-weight:700">${isFull?'🔴 پر':fa(cur)+'/'+fa(max)}</span>
       </div>`;
     }).join('');
     const monthlyLabel=c.termLabel||'ماهانه';
@@ -1616,8 +1626,11 @@ function renderClasses(){
           <button class="btn-res" onclick="openModal('کلاس ${c.n} (جلسه‌ای)','${price}')">رزرو جلسه‌ای</button>
           ${hasMonthly?`<button class="btn-res" style="background:var(--lb)" onclick="openModal('کلاس ${c.n} (${monthlyLabel})','${monthlyPrice}')">رزرو ${c.termLabel?'ترمی':'ماهیانه'}</button>`:''}
         </div>`;
+    const cctopInner=c.img
+      ?`<img src="${c.img}" alt="${c.n}" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">`
+      :`<span>${c.e}</span>`;
     return `<div class="class-card fade">
-      <div class="cctop ${c.t}"><span>${c.e}</span><span class="cage">${c.a}</span><span class="cday">${c.d}</span></div>
+      <div class="cctop ${c.t}">${cctopInner}<span class="cage">${c.a}</span><span class="cday">${c.d}</span></div>
       <div class="ccbody">
         <h3>${c.n}</h3><p>${c.desc}</p>
         ${fullBadge}
@@ -1728,9 +1741,8 @@ function openModal(type,price){
     sessWrap.style.display='block';
     sessSel.innerHTML=matchedClass.sessions.map(s=>{
       const cap=S.caps[s.capKey];
-      const ov=S.classOverrides[matchedClass.id];
-      const idx=matchedClass.sessions.indexOf(s);
-      const dispT=(ov&&ov.times&&ov.times[idx])||s.time;
+      const dLabel=dayLabel(s.days||(s.day?[s.day]:[]));
+      const dispT=(dLabel?dLabel+' ساعت ':'')+s.time;
       const full=cap&&cap.cur>=cap.max;
       return `<option value="${s.capKey}" ${full?'disabled':''}>${dispT}${full?' — ظرفیت پر':''}</option>`;
     }).join('');
@@ -2024,7 +2036,6 @@ function _openAdminPanel(){
   document.getElementById('aPassConf').value='';
   // build controls
   buildCapControls();
-  buildSchedControls();
   // init sessions for new class
   if(document.getElementById('ncSessionsWrap').innerHTML==='') addNcSession();
   document.getElementById('adminOverlay').classList.add('open');
@@ -2099,7 +2110,8 @@ function savePrices(){
 }
 
 
-function saveAdmin(){
+async function saveAdmin(){
+  const btn=document.querySelector('.admin-save[onclick="saveAdmin()"]');
   const cn=document.getElementById('aCardNum');
   const co=document.getElementById('aCardOwner');
   if(cn) S.card.num=cn.value;
@@ -2131,9 +2143,13 @@ function saveAdmin(){
     if(np===cp){ADMIN_PASS_VAR=np;showToast('🔑 رمز عبور تغییر یافت!');}
     else{showToast('⚠️ رمزها یکسان نیستند!');return;}
   }
-  // save class edits
-  saveClassEdits();
-  saveSchedOverrides();
+  // save class edits (شامل آپلود عکس‌های کلاس — ممکن است کمی طول بکشد)
+  if(btn){btn.disabled=true;btn.textContent='⏳ در حال ذخیره...';}
+  try{
+    await saveClassEdits();
+  }catch(e){
+    console.error('saveClassEdits failed:',e);
+  }
   // re-render
   renderClasses();
   renderDetails();
@@ -2147,6 +2163,7 @@ function saveAdmin(){
   applyContactInfo();
   closeAdmin();
   const ok=S.save();
+  if(btn){btn.disabled=false;btn.textContent='💾 ذخیره همه تغییرات';}
   showToast(ok?'✅ تغییرات ذخیره شد!':'⚠️ تغییرات اعمال شد ولی ذخیره دائمی با خطا مواجه شد');
 }
 
@@ -2207,20 +2224,20 @@ function applyContactInfo(){
 }
 
 // ===== CLASS EDITOR =====
+const ALL_DAYS=['شنبه','یک‌شنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنج‌شنبه'];
 function buildClassEditControls(){
   const cd=getCD();
-  const days=['شنبه','یک‌شنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنج‌شنبه'];
   document.getElementById('classEditList').innerHTML=cd.map((c,idx)=>{
     const ov=S.classOverrides[c.id]||{};
-    const curDay=ov.day||c.d;
     const curAge=ov.age||c.a;
     const curInst=ov.inst||c.inst;
     const curName=ov.name||c.n;
     const curEmoji=ov.emoji||c.e;
     const curDesc=ov.desc||c.desc;
-    const dayOpts=days.map(d=>`<option ${d===curDay?'selected':''}>${d}</option>`).join('');
+    const curImg=c.img||'';
+    const sessionsHtml=c.sessions.map((s,si)=>renderSessionRow(idx,si,s)).join('');
     return `
-    <div class="class-edit-card">
+    <div class="class-edit-card" id="ce-card-${idx}" data-classid="${c.id}">
       <div class="ce-head">${c.e} ${c.n}</div>
       <div class="arow">
         <div class="afield"><label>نام کلاس</label><input type="text" id="ce-name-${idx}" value="${curName}"></div>
@@ -2230,23 +2247,153 @@ function buildClassEditControls(){
         <div class="afield"><label>بازه سنی</label><input type="text" id="ce-age-${idx}" value="${curAge}"></div>
         <div class="afield"><label>نام مربی</label><input type="text" id="ce-inst-${idx}" value="${curInst}"></div>
       </div>
-      <div class="arow">
-        <div class="afield"><label>روز برگزاری</label><select class="fc" id="ce-day-${idx}">${dayOpts}</select></div>
+      <div class="afield" style="margin-bottom:10px"><label>توضیحات</label><textarea id="ce-desc-${idx}" rows="2" style="border:1.5px solid var(--g2);border-radius:10px;padding:9px 12px;font-family:'Vazirmatn',sans-serif;font-size:.83rem;width:100%;resize:vertical;outline:none;">${curDesc}</textarea></div>
+
+      <div style="background:var(--g1);border-radius:12px;padding:13px 14px;margin-bottom:12px;">
+        <div style="font-size:.8rem;font-weight:700;color:var(--blue);margin-bottom:4px">📅 روز و ساعت جلسات</div>
+        <div style="font-size:.7rem;color:var(--g4);margin-bottom:10px;line-height:1.7">برای هر جلسه، روز (یا چند روز) و ساعت را انتخاب کنید. اگر چند روز را با ساعت یکسان وارد کنید، در کارت کلاس به‌صورت «یکشنبه و سه‌شنبه ساعت ۵» نشان داده می‌شود.</div>
+        <div id="ce-sessions-${idx}">${sessionsHtml}</div>
+        <button type="button" onclick="addCeSession(${idx})" style="background:none;border:1.5px dashed var(--lb);color:var(--blue);padding:6px 16px;border-radius:50px;font-family:'Vazirmatn',sans-serif;font-size:.78rem;cursor:pointer;margin-top:4px;">+ افزودن جلسه</button>
       </div>
-      <div class="afield" style="margin-bottom:8px"><label>توضیحات</label><textarea id="ce-desc-${idx}" rows="2" style="border:1.5px solid var(--g2);border-radius:10px;padding:9px 12px;font-family:'Vazirmatn',sans-serif;font-size:.83rem;width:100%;resize:vertical;outline:none;">${curDesc}</textarea></div>
+
+      <div style="background:var(--g1);border-radius:12px;padding:13px 14px;margin-bottom:12px;">
+        <div style="font-size:.8rem;font-weight:700;color:var(--blue);margin-bottom:8px">🖼 عکس کلاس (اختیاری — فقط یک عکس)</div>
+        <div id="ce-imgwrap-${idx}" style="${curImg?'':'display:none'}margin-bottom:8px;">
+          <div style="position:relative;width:120px;height:90px;border-radius:10px;overflow:hidden;border:1.5px solid var(--g2);">
+            <img id="ce-imgpreview-${idx}" src="${curImg}" style="width:100%;height:100%;object-fit:cover;display:block;">
+            <button type="button" onclick="removeClassImage(${idx})" title="حذف عکس" style="position:absolute;top:3px;left:3px;background:rgba(220,50,50,.9);color:white;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:.7rem;line-height:1;">✕</button>
+          </div>
+        </div>
+        <input type="file" accept="image/*" id="ce-imgfile-${idx}" style="display:none" onchange="onClassImageSelected(${idx})">
+        <button type="button" onclick="document.getElementById('ce-imgfile-${idx}').click()" style="background:white;border:1.5px solid var(--g2);color:var(--blue);padding:7px 16px;border-radius:50px;font-family:'Vazirmatn',sans-serif;font-size:.78rem;cursor:pointer;">📷 انتخاب عکس</button>
+        <span id="ce-imgstatus-${idx}" style="font-size:.72rem;color:var(--g6);margin-right:6px;"></span>
+      </div>
+
       <button onclick="deleteClassById('${c.id}')" style="width:100%;background:rgba(255,93,162,.08);border:1.5px solid var(--red);color:var(--red);border-radius:10px;padding:8px;font-family:'Vazirmatn',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;margin-top:2px;">🗑 حذف این کلاس</button>
     </div>`;
   }).join('');
 }
-function saveClassEdits(){
+
+function renderSessionRow(classIdx,sessIdx,session){
+  const sdays=session.days||(session.day?[session.day]:[]);
+  const dayBtns=ALL_DAYS.map(d=>{
+    const active=sdays.includes(d);
+    return `<button type="button" class="ce-day-chip${active?' active':''}" data-day="${d}" onclick="toggleCeDay(this,${classIdx},${sessIdx})">${d}</button>`;
+  }).join('');
+  const capKeyAttr=session.capKey?session.capKey.replace(/"/g,'&quot;'):'';
+  return `<div class="ce-session-row" id="ce-sessrow-${classIdx}-${sessIdx}" data-sessidx="${sessIdx}" data-capkey="${capKeyAttr}">
+    <div style="font-size:.72rem;color:var(--g6);font-weight:700;margin-bottom:6px;">جلسه ${fa(sessIdx+1)}</div>
+    <div class="ce-day-chips">${dayBtns}</div>
+    <div style="display:flex;gap:6px;align-items:center;margin-top:8px;">
+      <input class="fc" style="font-size:.78rem;padding:7px 10px;flex:1;" value="${(session.time||'').replace(/"/g,'&quot;')}" placeholder="مثلاً ۵ تا ۶ — خالی بگذارید تا این جلسه حذف شود" id="ce-time-${classIdx}-${sessIdx}">
+      <button type="button" onclick="removeCeSession(${classIdx},${sessIdx})" style="background:none;border:none;color:var(--red);font-size:1rem;cursor:pointer;padding:4px 8px;border-radius:6px;" title="حذف این جلسه">✕</button>
+    </div>
+  </div>`;
+}
+
+function toggleCeDay(btn,classIdx,sessIdx){
+  btn.classList.toggle('active');
+}
+
+function addCeSession(classIdx){
+  const wrap=document.getElementById('ce-sessions-'+classIdx);
+  const newIdx=wrap.children.length;
+  const div=document.createElement('div');
+  div.innerHTML=renderSessionRow(classIdx,newIdx,{days:[],time:''});
+  wrap.appendChild(div.firstElementChild);
+}
+
+function removeCeSession(classIdx,sessIdx){
+  const wrap=document.getElementById('ce-sessions-'+classIdx);
+  if(wrap.children.length<=1){ showToast('⚠️ هر کلاس باید حداقل یک جلسه داشته باشد'); return; }
+  const row=document.getElementById('ce-sessrow-'+classIdx+'-'+sessIdx);
+  if(row) row.remove();
+}
+
+// ===== CLASS IMAGE (per-class single photo) =====
+let _ceImgPending={}; // classIdx -> dataUrl (pending upload, applied on save)
+async function onClassImageSelected(classIdx){
+  const input=document.getElementById('ce-imgfile-'+classIdx);
+  const statusEl=document.getElementById('ce-imgstatus-'+classIdx);
+  const file=input.files&&input.files[0];
+  if(!file) return;
+  statusEl.textContent='⏳ در حال پردازش...';
+  try{
+    const dataUrl=await compressImageFile(file);
+    _ceImgPending[classIdx]=dataUrl;
+    const wrap=document.getElementById('ce-imgwrap-'+classIdx);
+    const preview=document.getElementById('ce-imgpreview-'+classIdx);
+    preview.src=dataUrl;
+    wrap.style.display='block';
+    statusEl.textContent='✅ آماده — با دکمه ذخیره، عکس ثبت می‌شود';
+  }catch(e){
+    console.error(e);
+    statusEl.textContent='❌ خطا در پردازش عکس';
+  }
+  input.value='';
+}
+function removeClassImage(classIdx){
+  _ceImgPending[classIdx]='__REMOVE__';
+  const wrap=document.getElementById('ce-imgwrap-'+classIdx);
+  wrap.style.display='none';
+  const statusEl=document.getElementById('ce-imgstatus-'+classIdx);
+  if(statusEl) statusEl.textContent='🗑 عکس با ذخیره، حذف می‌شود';
+}
+
+async function saveClassEdits(){
   const cd=getCD();
-  cd.forEach((c,idx)=>{
+  for(let idx=0;idx<cd.length;idx++){
+    const c=cd[idx];
     const n=document.getElementById('ce-name-'+idx);
     const em=document.getElementById('ce-emoji-'+idx);
     const ag=document.getElementById('ce-age-'+idx);
     const inst=document.getElementById('ce-inst-'+idx);
     const desc=document.getElementById('ce-desc-'+idx);
-    const day=document.getElementById('ce-day-'+idx);
+    const finalName=n?n.value:c.n;
+    // collect sessions for this class from the DOM
+    // اگر ساعت یک جلسه خالی باشد، آن جلسه (و روز/روزهایش) کلاً از کلاس حذف می‌شود
+    const sessWrap=document.getElementById('ce-sessions-'+idx);
+    const sessions=[];
+    if(sessWrap){
+      Array.from(sessWrap.children).forEach(row=>{
+        const chips=row.querySelectorAll('.ce-day-chip.active');
+        const days=Array.from(chips).map(ch=>ch.dataset.day);
+        const timeInp=row.querySelector('input.fc');
+        const time=timeInp?timeInp.value.trim():'';
+        if(!time) return; // ساعت خالی => حذف این جلسه
+        let capKey=row.dataset.capkey;
+        if(!capKey){
+          // جلسه جدید — یک capKey تازه بساز
+          capKey='custom-'+c.id+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,6);
+        }
+        if(!S.caps[capKey]) S.caps[capKey]={label:finalName+' '+time,cur:0,max:30,min:0};
+        else S.caps[capKey].label=finalName+' '+time;
+        sessions.push({days,time,capKey});
+      });
+    }
+    if(sessions.length===0){
+      showToast('⚠️ کلاس «'+finalName+'» باید حداقل یک جلسه با ساعت داشته باشد — تغییرات جلسات آن نادیده گرفته شد');
+    }
+    // ===== آپلود واقعی عکس کلاس (در صورت تغییر) به‌جای ذخیره base64 خام در config =====
+    let finalImg; // undefined = no change requested
+    if(_ceImgPending[idx]!==undefined){
+      if(_ceImgPending[idx]==='__REMOVE__'){
+        finalImg='';
+        if(window._FB && window._FB.deleteGalleryImage){
+          try{ await window._FB.deleteGalleryImage('class-img-'+c.id); }catch(e){}
+        }
+      } else {
+        const dataUrl=_ceImgPending[idx];
+        let url=dataUrl; // fallback اگر آپلود ابری شکست بخورد
+        if(window._FB && window._FB.uploadGalleryImage){
+          try{
+            const fbUrl=await window._FB.uploadGalleryImage('class-img-'+c.id, dataUrl);
+            if(fbUrl) url=fbUrl;
+          }catch(e){ console.error('class image upload failed:',e); }
+        }
+        finalImg=url;
+      }
+    }
     const isExtra=S.extraClasses.find(e=>e.id===c.id);
     if(isExtra){
       // Extra classes: edit in-place
@@ -2255,7 +2402,8 @@ function saveClassEdits(){
       if(ag) isExtra.a=ag.value;
       if(inst) isExtra.inst=inst.value;
       if(desc) isExtra.desc=desc.value;
-      if(day) isExtra.d=day.value;
+      if(sessions.length) isExtra.sessions=sessions;
+      if(finalImg!==undefined) isExtra.img=finalImg;
     } else {
       // Base classes: store overrides
       S.classOverrides[c.id]=S.classOverrides[c.id]||{};
@@ -2264,16 +2412,19 @@ function saveClassEdits(){
       if(ag) S.classOverrides[c.id].age=ag.value;
       if(inst) S.classOverrides[c.id].inst=inst.value;
       if(desc) S.classOverrides[c.id].desc=desc.value;
-      if(day) S.classOverrides[c.id].day=day.value;
+      if(sessions.length) S.classOverrides[c.id].sessions=sessions;
+      if(finalImg!==undefined) S.classOverrides[c.id].img=finalImg;
       // Apply to current class object for immediate re-render
       if(n) c.n=n.value;
       if(em) c.e=em.value;
       if(ag) c.a=ag.value;
       if(inst) c.inst=inst.value;
       if(desc) c.desc=desc.value;
-      if(day) c.d=day.value;
+      if(sessions.length) c.sessions=sessions;
+      if(finalImg!==undefined) c.img=finalImg;
     }
-  });
+  }
+  _ceImgPending={};
 }
 
 // ===== ADD NEW CLASS =====
@@ -2282,16 +2433,19 @@ function addNcSession(){
   ncSessionCount++;
   const wrap=document.getElementById('ncSessionsWrap');
   const div=document.createElement('div');
-  div.style.cssText='display:flex;gap:6px;align-items:center;margin-bottom:6px;';
-  div.innerHTML=`<input class="fc" style="font-size:.8rem;padding:8px 11px;" placeholder="مثلاً: ۵ تا ۶" id="nc-sess-${ncSessionCount}">
-    <button type="button" onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--red);font-size:1.1rem;cursor:pointer;padding:4px 8px;border-radius:6px;">✕</button>`;
+  div.className='ce-session-row';
+  div.innerHTML=`<div style="font-size:.72rem;color:var(--g6);font-weight:700;margin-bottom:6px;">جلسه ${fa(ncSessionCount)}</div>
+    <div class="ce-day-chips">${ALL_DAYS.map(d=>`<button type="button" class="ce-day-chip" data-day="${d}" onclick="this.classList.toggle('active')">${d}</button>`).join('')}</div>
+    <div style="display:flex;gap:6px;align-items:center;margin-top:8px;">
+      <input class="fc nc-sess-time" style="font-size:.8rem;padding:8px 11px;flex:1;" placeholder="مثلاً: ۵ تا ۶" id="nc-sess-${ncSessionCount}">
+      <button type="button" onclick="this.closest('.ce-session-row').remove()" style="background:none;border:none;color:var(--red);font-size:1.1rem;cursor:pointer;padding:4px 8px;border-radius:6px;">✕</button>
+    </div>`;
   wrap.appendChild(div);
 }
-function addNewClass(){
+async function addNewClass(){
   const name=document.getElementById('ncName').value.trim();
   const emoji=document.getElementById('ncEmoji').value.trim()||'🎯';
   const color=document.getElementById('ncColor').value;
-  const day=document.getElementById('ncDay').value;
   const age=document.getElementById('ncAge').value.trim();
   const inst=document.getElementById('ncInst').value.trim();
   const desc=document.getElementById('ncDesc').value.trim();
@@ -2302,21 +2456,35 @@ function addNewClass(){
   const tabIdEl=document.getElementById('ncTabId');
   const tabId=tabIdEl?tabIdEl.value:'';
   if(!name){showToast('⚠️ نام کلاس را وارد کنید');return;}
-  // collect sessions
-  const sessionInputs=document.querySelectorAll('#ncSessionsWrap input');
+  // collect sessions (day chips + time) from each session row — ساعت خالی یعنی آن جلسه نادیده گرفته می‌شود
+  const sessionRows=document.querySelectorAll('#ncSessionsWrap .ce-session-row');
   const sessions=[];
-  sessionInputs.forEach((inp,i)=>{
-    const t=inp.value.trim();
-    if(t){
-      const capKey='custom-'+name+'-'+i;
-      S.caps[capKey]={label:name+' '+t,cur,max:cap};
-      sessions.push({time:t,capKey});
-    }
+  sessionRows.forEach((row,i)=>{
+    const chips=row.querySelectorAll('.ce-day-chip.active');
+    const days=Array.from(chips).map(ch=>ch.dataset.day);
+    const timeInp=row.querySelector('.nc-sess-time');
+    const t=timeInp?timeInp.value.trim():'';
+    if(!t) return;
+    const capKey='custom-'+name+'-'+i+'-'+Date.now();
+    S.caps[capKey]={label:name+' '+t,cur,max:cap,min:0};
+    sessions.push({days,time:t,capKey});
   });
-  if(sessions.length===0){showToast('⚠️ حداقل یک جلسه وارد کنید');return;}
+  if(sessions.length===0){showToast('⚠️ حداقل یک جلسه با ساعت وارد کنید');return;}
   const priceKey='custom_'+Date.now();
   S.prices[priceKey]=price;
-  const newClass={id:'custom-'+Date.now(),n:name,e:emoji,t:color,a:age||'همه سنین',d:day,sessions,inst:inst||'—',priceKey,desc:desc||'کلاس جدید',custom:true,tabId:tabId||''};
+  const classId='custom-'+Date.now();
+  // آپلود واقعی عکس کلاس (در صورت انتخاب) — به‌جای ذخیره base64 خام در config
+  let ncImg='';
+  if(_ncImgPending){
+    ncImg=_ncImgPending; // fallback اگر آپلود ابری شکست بخورد
+    if(window._FB && window._FB.uploadGalleryImage){
+      try{
+        const fbUrl=await window._FB.uploadGalleryImage('class-img-'+classId, _ncImgPending);
+        if(fbUrl) ncImg=fbUrl;
+      }catch(e){ console.error('class image upload failed:',e); }
+    }
+  }
+  const newClass={id:classId,n:name,e:emoji,t:color,a:age||'همه سنین',sessions,inst:inst||'—',priceKey,desc:desc||'کلاس جدید',custom:true,tabId:tabId||'',img:ncImg};
   if(priceM>0){
     const monthlyPriceKey='custom_m_'+Date.now();
     S.prices[monthlyPriceKey]=priceM;
@@ -2334,12 +2502,42 @@ function addNewClass(){
   document.getElementById('ncSessionsWrap').innerHTML='';
   ncSessionCount=0;
   if(tabIdEl) tabIdEl.value='';
+  resetNcImage();
   addNcSession();
   renderClasses();
   renderDetails();
   buildDeleteClassList();
   renderCustomTabs();
+  S.save();
   showToast('✅ کلاس «'+name+'» اضافه شد!');
+}
+
+// ===== NEW CLASS IMAGE =====
+let _ncImgPending='';
+async function onNcImageSelected(){
+  const input=document.getElementById('ncImgFile');
+  const statusEl=document.getElementById('ncImgStatus');
+  const file=input.files&&input.files[0];
+  if(!file) return;
+  statusEl.textContent='⏳ در حال پردازش...';
+  try{
+    const dataUrl=await compressImageFile(file);
+    _ncImgPending=dataUrl;
+    document.getElementById('ncImgPreview').src=dataUrl;
+    document.getElementById('ncImgPreviewWrap').style.display='block';
+    statusEl.textContent='✅ عکس انتخاب شد';
+  }catch(e){
+    console.error(e);
+    statusEl.textContent='❌ خطا در پردازش عکس';
+  }
+  input.value='';
+}
+function resetNcImage(){
+  _ncImgPending='';
+  const wrap=document.getElementById('ncImgPreviewWrap');
+  if(wrap) wrap.style.display='none';
+  const statusEl=document.getElementById('ncImgStatus');
+  if(statusEl) statusEl.textContent='';
 }
 // کلاس‌های پایه که hardcode هستن
 const BASE_CLASS_IDS=['kollazh','rhythm-mon','ballet','rhythm-wed','theater','acting','montessori-sat-wed','montessori-sun-tue','workshop-mother-child'];
@@ -2734,16 +2932,18 @@ function renderClassCard(c){
   const hasMonthly=rawMonthly!==undefined&&rawMonthly!==''&&Number(rawMonthly)>0;
   const monthlyPrice=hasMonthly?fmtPrice(rawMonthly):'';
   const allFull=c.sessions.every(s=>{ const cap=S.caps[s.capKey]; return cap && cap.cur>=cap.max; });
-  const sesHtml=c.sessions.map(s=>{
-    const cap=S.caps[s.capKey]||{cur:0,max:20};
-    const _ov=S.classOverrides[c.id];
-    const _dispT=(_ov&&_ov.times&&_ov.times[c.sessions.indexOf(s)])||s.time;
-    const isFull=cap.cur>=cap.max;
-    const pct=Math.min(100,Math.round(cap.cur/cap.max*100));
+  const groups=mergeSessionsForDisplay(c.sessions);
+  const sesHtml=groups.map(g=>{
+    const caps=g.sessions.map(s=>S.caps[s.capKey]).filter(Boolean);
+    const cur=caps.reduce((a,b)=>a+(b.cur||0),0);
+    const max=caps.reduce((a,b)=>a+(b.max||0),0)||1;
+    const isFull=cur>=max;
+    const pct=Math.min(100,Math.round(cur/max*100));
+    const dLabel=g.days.length?dayLabel(g.days)+' ساعت ':'';
     return `<div style="display:flex;align-items:center;gap:8px;font-size:.72rem;color:var(--g6);margin-bottom:4px;">
-      <span>🕐 ${_dispT}</span>
+      <span>🕐 ${dLabel}${g.time}</span>
       <div style="flex:1;height:5px;background:#eee;border-radius:5px;overflow:hidden"><div style="width:${pct}%;height:100%;background:${isFull?'var(--red)':'linear-gradient(90deg,#6BCB77,var(--lb))'};border-radius:5px"></div></div>
-      <span style="color:${isFull?'var(--red)':'var(--g6)'};font-weight:700">${isFull?'🔴 پر':fa(cap.cur)+'/'+fa(cap.max)}</span>
+      <span style="color:${isFull?'var(--red)':'var(--g6)'};font-weight:700">${isFull?'🔴 پر':fa(cur)+'/'+fa(max)}</span>
     </div>`;
   }).join('');
   const monthlyLabel=c.termLabel||'ماهانه';
@@ -2757,8 +2957,11 @@ function renderClassCard(c){
         <button class="btn-res" onclick="openModal('کلاس ${c.n} (جلسه‌ای)','${price}')">رزرو جلسه‌ای</button>
         ${hasMonthly?`<button class="btn-res" style="background:var(--lb)" onclick="openModal('کلاس ${c.n} (${monthlyLabel})','${monthlyPrice}')">رزرو ${c.termLabel?'ترمی':'ماهیانه'}</button>`:''}
       </div>`;
+  const cctopInner=c.img
+    ?`<img src="${c.img}" alt="${c.n}" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">`
+    :`<span>${c.e}</span>`;
   return `<div class="class-card fade">
-    <div class="cctop ${c.t}"><span>${c.e}</span><span class="cage">${c.a}</span><span class="cday">${c.d}</span></div>
+    <div class="cctop ${c.t}">${cctopInner}<span class="cage">${c.a}</span><span class="cday">${c.d}</span></div>
     <div class="ccbody">
       <h3>${c.n}</h3><p>${c.desc}</p>
       ${fullBadge}
