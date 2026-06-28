@@ -587,6 +587,10 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
 .msg-card .msg-subj{font-size:.72rem;background:rgba(108,74,182,.08);color:var(--blue);padding:2px 9px;border-radius:50px;font-weight:600;}
 .msg-card .msg-body{font-size:.82rem;color:var(--g6);line-height:1.8;}
 .msg-card .msg-phone{font-size:.75rem;color:var(--g4);margin-top:6px;}
+/* Order buttons */
+.order-btn{background:var(--g1);border:1.5px solid var(--g2);border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:.9rem;color:var(--blue);transition:all .15s;display:inline-flex;align-items:center;justify-content:center;}
+.order-btn:hover:not(:disabled){background:rgba(108,74,182,.1);border-color:var(--lb);}
+.order-btn:disabled{opacity:.3;cursor:default;}
 </style>
 </head>
 <body>
@@ -980,7 +984,16 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
 
     <!-- TAB: CLASSES -->
     <div class="atab-content" id="tab-classes" style="display:none">
-      <div id="classEditList"></div>
+      <div class="asec" id="classOrderSection">
+        <h3>↕️ ترتیب نمایش کلاس‌ها</h3>
+        <p style="font-size:.76rem;color:var(--g4);margin-bottom:12px;line-height:1.7">با دکمه‌های بالا/پایین، ترتیب نمایش کلاس‌ها را تغییر دهید. تغییرات با دکمه ذخیره اعمال می‌شوند.</p>
+        <div id="classOrderList"></div>
+        <button class="admin-save" style="margin-top:8px" onclick="saveClassOrder()">💾 ذخیره ترتیب کلاس‌ها</button>
+      </div>
+      <div class="asec">
+        <h3>✏️ ویرایش اطلاعات کلاس‌ها</h3>
+        <div id="classEditList"></div>
+      </div>
     </div>
 
     <!-- TAB: ADD CLASS -->
@@ -1250,6 +1263,8 @@ const S = {
   addr: 'همدان — ۱۸ متری ذوالفقار، روبروی پارک گلها، انتهای کوچه گلستان',
   classOverrides: {},
   deletedBaseClasses: [],
+  classOrder: [], // ترتیب نمایش کلاس‌ها — آرایه‌ای از id
+  customTabOrder: [], // ترتیب نمایش تب‌ها — آرایه‌ای از id
   gallery: [],
   STORAGE_KEY: 'nozhinSiteData_v1',
   save(){
@@ -1260,6 +1275,8 @@ const S = {
       adminPass:(typeof ADMIN_PASS_VAR!=='undefined'?ADMIN_PASS_VAR:undefined),
       deletedBaseClasses:this.deletedBaseClasses||[],
       customTabs:this.customTabs||[],
+      classOrder:this.classOrder||[],
+      customTabOrder:this.customTabOrder||[],
       _tabsSavedToServer:true
       // NOTE: gallery NOT included here — saved separately per-image
     };
@@ -1327,6 +1344,8 @@ const S = {
         this.customTabs=data.customTabs;
       }
     }
+    if(Array.isArray(data.classOrder)) this.classOrder=data.classOrder;
+    if(Array.isArray(data.customTabOrder)) this.customTabOrder=data.customTabOrder;
     if(data.adminPass && typeof ADMIN_PASS_VAR!=='undefined') { try{ ADMIN_PASS_VAR=data.adminPass; }catch(e){} }
   }
 };
@@ -1359,7 +1378,8 @@ function classOverallDay(sessions){
   sessions.forEach(s=>{ (s.days||(s.day?[s.day]:[])).forEach(d=>{ if(!all.includes(d)) all.push(d); }); });
   return all.length?all.join(' و '):'اعلام می‌شود';
 }
-function getCD(){const _del=S.deletedBaseClasses||[];return[
+function getCD(){const _del=S.deletedBaseClasses||[];
+const _rawList=[
   {id:'kollazh',n:'نقاشی کلاژی',e:'🎨',t:'ct1',a:'۳ تا ۸ سال',sessions:[
     {days:['شنبه'],time:'۵ تا ۶',capKey:'kollazh-1'},{days:['شنبه'],time:'۶ تا ۷',capKey:'kollazh-2'}],
     inst:'خانم قربانی چم',priceKey:'kollazh',monthlyPriceKey:'kollazh_m',
@@ -1421,6 +1441,15 @@ function getCD(){const _del=S.deletedBaseClasses||[];return[
     c.d=classOverallDay(c.sessions);
     return c;
   });
+  // اعمال ترتیب سفارشی (classOrder)
+  const order=S.classOrder||[];
+  if(order.length>0){
+    const ordered=[];
+    order.forEach(id=>{ const c=_rawList.find(x=>x.id===id); if(c) ordered.push(c); });
+    _rawList.forEach(c=>{ if(!order.includes(c.id)) ordered.push(c); });
+    return ordered;
+  }
+  return _rawList;
 }
 
 
@@ -1994,7 +2023,7 @@ function switchTab(id){
   document.getElementById(id).style.display='block';
   event.currentTarget.classList.add('active');
   if(id==='tab-stats') renderStats();
-  if(id==='tab-classes') buildClassEditControls();
+  if(id==='tab-classes'){ buildClassOrderList(); buildClassEditControls(); }
   if(id==='tab-addclass'){ buildDeleteClassList(); _populateTabSelects(); }
   if(id==='tab-gallery') buildGalAdminGrid();
   if(id==='tab-prices') _loadPriceFields();
@@ -2589,6 +2618,48 @@ function deleteClass(i){
   deleteClassById(c.id);
 }
 
+// ===== CLASS ORDER MANAGEMENT =====
+function buildClassOrderList(){
+  const wrap=document.getElementById('classOrderList');
+  if(!wrap) return;
+  const cd=getCD();
+  if(cd.length===0){ wrap.innerHTML='<div style="font-size:.8rem;color:var(--g4);">کلاسی وجود ندارد</div>'; return; }
+  wrap.innerHTML=cd.map((c,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;background:white;border:1.5px solid var(--g2);border-radius:10px;padding:10px 14px;margin-bottom:7px;" id="cord-${c.id}">
+      <span style="font-size:1rem;min-width:22px;text-align:center">${c.e}</span>
+      <span style="flex:1;font-size:.85rem;font-weight:600;color:var(--blue)">${c.n} <span style="font-size:.72rem;color:var(--g6);font-weight:400">— ${c.d}</span></span>
+      <div style="display:flex;gap:4px;">
+        <button onclick="moveClass('${c.id}',-1)" title="بالاتر" ${i===0?'disabled':''} style="background:var(--g1);border:1.5px solid var(--g2);border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:.85rem;color:var(--blue);opacity:${i===0?.3:1}">↑</button>
+        <button onclick="moveClass('${c.id}',1)" title="پایین‌تر" ${i===cd.length-1?'disabled':''} style="background:var(--g1);border:1.5px solid var(--g2);border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:.85rem;color:var(--blue);opacity:${i===cd.length-1?.3:1}">↓</button>
+      </div>
+    </div>`).join('');
+}
+
+function moveClass(id, dir){
+  const cd=getCD();
+  const ids=cd.map(c=>c.id);
+  const idx=ids.indexOf(id);
+  if(idx===-1) return;
+  const newIdx=idx+dir;
+  if(newIdx<0||newIdx>=ids.length) return;
+  // swap
+  [ids[idx],ids[newIdx]]=[ids[newIdx],ids[idx]];
+  S.classOrder=ids;
+  buildClassOrderList();
+  buildClassEditControls();
+}
+
+function saveClassOrder(){
+  const cd=getCD();
+  S.classOrder=cd.map(c=>c.id);
+  renderClasses();
+  renderDetails();
+  renderPricing();
+  renderCustomTabs();
+  S.save();
+  showToast('✅ ترتیب کلاس‌ها ذخیره شد!');
+}
+
 // ===== CUSTOM TAB MANAGEMENT =====
 function buildTabsList(){
   const wrap=document.getElementById('tabsList');
@@ -2598,14 +2669,17 @@ function buildTabsList(){
     wrap.innerHTML='<div style="font-size:.8rem;color:var(--g4);padding:10px">هنوز تب سفارشی ساخته نشده. یکی بساز! ⬇</div>';
     return;
   }
-  wrap.innerHTML=tabs.map(tab=>`
-    <div style="display:flex;align-items:center;justify-content:space-between;background:white;border:1.5px solid var(--g2);border-radius:10px;padding:10px 14px;margin-bottom:7px;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <span style="font-size:1.1rem;">${tab.icon||'📑'}</span>
-        <input type="text" value="${tab.label}" id="tl-label-${tab.id}" style="border:1.5px solid var(--g2);border-radius:8px;padding:5px 10px;font-family:'Vazirmatn',sans-serif;font-size:.82rem;outline:none;width:140px;" onblur="updateTabLabel('${tab.id}')">
+  wrap.innerHTML=tabs.map((tab,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;background:white;border:1.5px solid var(--g2);border-radius:10px;padding:10px 14px;margin-bottom:7px;">
+      <span style="font-size:1.1rem;min-width:22px;text-align:center">${tab.icon||'📑'}</span>
+      <input type="text" value="${tab.label}" id="tl-label-${tab.id}" style="border:1.5px solid var(--g2);border-radius:8px;padding:5px 10px;font-family:'Vazirmatn',sans-serif;font-size:.82rem;outline:none;flex:1;" onblur="updateTabLabel('${tab.id}')">
+      <div style="display:flex;gap:4px;">
+        <button onclick="moveTab('${tab.id}',-1)" title="بالاتر" ${i===0?'disabled':''} style="background:var(--g1);border:1.5px solid var(--g2);border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:.8rem;color:var(--blue);opacity:${i===0?.3:1}">↑</button>
+        <button onclick="moveTab('${tab.id}',1)" title="پایین‌تر" ${i===tabs.length-1?'disabled':''} style="background:var(--g1);border:1.5px solid var(--g2);border-radius:8px;width:30px;height:30px;cursor:pointer;font-size:.8rem;color:var(--blue);opacity:${i===tabs.length-1?.3:1}">↓</button>
       </div>
-      <button class="del-class-btn" onclick="deleteCustomTab('${tab.id}')">🗑 حذف</button>
-    </div>`).join('');
+      <button class="del-class-btn" onclick="deleteCustomTab('${tab.id}')">🗑</button>
+    </div>`).join('')+
+    `<button class="admin-save" style="margin-top:6px;background:linear-gradient(135deg,#6C4AB6,#8B6FCF);" onclick="saveTabOrder()">💾 ذخیره ترتیب تب‌ها</button>`;
 }
 
 function updateTabLabel(id){
@@ -2616,6 +2690,24 @@ function updateTabLabel(id){
     tab.label=inp.value;
     renderCustomTabs();
   }
+}
+
+function moveTab(id, dir){
+  if(!S.customTabs) return;
+  const idx=S.customTabs.findIndex(t=>t.id===id);
+  if(idx===-1) return;
+  const newIdx=idx+dir;
+  if(newIdx<0||newIdx>=S.customTabs.length) return;
+  [S.customTabs[idx],S.customTabs[newIdx]]=[S.customTabs[newIdx],S.customTabs[idx]];
+  buildTabsList();
+  renderCustomTabs();
+  _populateTabSelects();
+}
+
+function saveTabOrder(){
+  renderCustomTabs();
+  S.save();
+  showToast('✅ ترتیب تب‌ها ذخیره شد!');
 }
 
 function addCustomTab(){
