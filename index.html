@@ -233,6 +233,34 @@
     async deleteRegistration(id) {
       try { await api("DELETE", "/registrations/" + id); return true; }
       catch(e) { console.error("CF deleteReg error:", e); return false; }
+    },
+    async saveReview(review) {
+      try { await api("POST", "/reviews", review); return true; }
+      catch(e) { console.error("CF saveReview error:", e); return false; }
+    },
+    async loadReviews() {
+      try { return await api("GET", "/reviews"); }
+      catch(e) { console.error("CF loadReviews error:", e); return []; }
+    },
+    async updateReview(id, fields) {
+      try { await api("PATCH", "/reviews/" + id, fields); return true; }
+      catch(e) { console.error("CF updateReview error:", e); return false; }
+    },
+    async deleteReview(id) {
+      try { await api("DELETE", "/reviews/" + id); return true; }
+      catch(e) { console.error("CF deleteReview error:", e); return false; }
+    },
+    async saveContactMessage(msg) {
+      try { await api("POST", "/messages", msg); return true; }
+      catch(e) { console.error("CF saveMsg error:", e); return false; }
+    },
+    async loadMessages() {
+      try { return await api("GET", "/messages"); }
+      catch(e) { console.error("CF loadMessages error:", e); return []; }
+    },
+    async deleteMessage(id) {
+      try { await api("DELETE", "/messages/" + id); return true; }
+      catch(e) { console.error("CF deleteMsg error:", e); return false; }
     }
   };
   window._fbReady = true;
@@ -528,6 +556,30 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
 /* Sched row */
 .sched-row{display:grid;grid-template-columns:160px 1fr;gap:8px;align-items:start;background:var(--g1);padding:9px 12px;border-radius:10px;margin-bottom:6px;}
 .sched-row label{font-size:.72rem;color:var(--g6);font-weight:700;display:block;margin-bottom:3px;}
+/* Reviews */
+.review-card{background:white;border-radius:16px;padding:18px 20px;border:1.5px solid var(--g2);box-shadow:var(--shsm);}
+.review-card .rv-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.review-card .rv-name{font-size:.88rem;font-weight:700;color:var(--blue);}
+.review-card .rv-stars{color:#f5a623;font-size:.95rem;letter-spacing:2px;direction:ltr;}
+.review-card .rv-class-tag{font-size:.7rem;background:rgba(108,74,182,.08);color:var(--blue);padding:2px 9px;border-radius:50px;font-weight:600;margin-bottom:8px;display:inline-block;}
+.review-card .rv-text{font-size:.83rem;color:var(--g6);line-height:1.85;margin-bottom:10px;}
+.review-card .rv-reply{background:rgba(54,201,176,.07);border-right:3px solid var(--mint);border-radius:8px;padding:10px 13px;font-size:.78rem;color:var(--g8);line-height:1.75;margin-top:8px;}
+.review-card .rv-reply strong{display:block;font-size:.72rem;color:#1a8c6e;font-weight:700;margin-bottom:4px;}
+.rv-admin-card{background:white;border:1.5px solid var(--g2);border-radius:12px;padding:14px 16px;margin-bottom:10px;}
+.rv-admin-card .rv-meta{font-size:.76rem;color:var(--g4);margin-bottom:8px;}
+.rv-admin-card textarea{border:1.5px solid var(--g2);border-radius:9px;padding:9px 12px;font-family:'Vazirmatn',sans-serif;font-size:.82rem;width:100%;resize:vertical;outline:none;min-height:60px;margin-top:8px;}
+.rv-admin-card textarea:focus{border-color:var(--lb);}
+.rv-action-row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.rv-approve-btn{background:var(--mint);color:white;border:none;padding:5px 14px;border-radius:50px;font-family:'Vazirmatn',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;}
+.rv-reject-btn{background:rgba(255,93,162,.1);border:1.5px solid var(--red);color:var(--red);padding:5px 14px;border-radius:50px;font-family:'Vazirmatn',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;}
+.rv-reply-btn{background:var(--g1);color:var(--blue);border:1.5px solid var(--lb);padding:5px 14px;border-radius:50px;font-family:'Vazirmatn',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;}
+.rv-del-btn{background:none;border:none;color:var(--g4);font-size:.75rem;cursor:pointer;padding:5px 10px;}
+.msg-card{background:white;border:1.5px solid var(--g2);border-radius:12px;padding:14px 16px;margin-bottom:10px;}
+.msg-card .msg-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.msg-card .msg-name{font-size:.88rem;font-weight:700;color:var(--blue);}
+.msg-card .msg-subj{font-size:.72rem;background:rgba(108,74,182,.08);color:var(--blue);padding:2px 9px;border-radius:50px;font-weight:600;}
+.msg-card .msg-body{font-size:.82rem;color:var(--g6);line-height:1.8;}
+.msg-card .msg-phone{font-size:.75rem;color:var(--g4);margin-top:6px;}
 </style>
 </head>
 <body>
@@ -692,13 +744,44 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
       <div class="cform fade">
         <h3>💬 پیام بفرستید</h3>
         <div class="fr">
-          <div class="fg"><label>نام شما</label><input class="fc" placeholder="نام و نام خانوادگی"></div>
-          <div class="fg"><label>شماره موبایل</label><input class="fc" placeholder="۰۹۱۲..."></div>
+          <div class="fg"><label>نام شما</label><input class="fc" id="cformName" placeholder="نام و نام خانوادگی"></div>
+          <div class="fg"><label>شماره موبایل</label><input class="fc" id="cformPhone" placeholder="۰۹۱۲..."></div>
         </div>
-        <div class="fg"><label>موضوع</label><select class="fc"><option>سوال درباره کلاس‌ها</option><option>رزرو نگهداری ساعتی</option><option>رزرو سالن تولد</option><option>سایر</option></select></div>
-        <div class="fg"><label>پیام</label><textarea class="fc" rows="4" placeholder="پیام خود را بنویسید..."></textarea></div>
-        <button class="btn-next" onclick="showToast('✅ پیام شما ارسال شد!')">📨 ارسال پیام</button>
+        <div class="fg"><label>موضوع</label><select class="fc" id="cformSubject"><option>سوال درباره کلاس‌ها</option><option>رزرو نگهداری ساعتی</option><option>رزرو سالن تولد</option><option>سایر</option></select></div>
+        <div class="fg"><label>پیام</label><textarea class="fc" id="cformMsg" rows="4" placeholder="پیام خود را بنویسید..."></textarea></div>
+        <button class="btn-next" onclick="submitContactForm()">📨 ارسال پیام</button>
+        <div id="cformStatus" style="font-size:.78rem;text-align:center;margin-top:8px;min-height:18px;"></div>
       </div>
+    </div>
+
+    <!-- بخش نظرات -->
+    <div style="margin-top:60px;">
+      <div class="sh center fade">
+        <div class="stag">نظرات والدین</div>
+        <h2 class="stitle">تجربه خانواده‌های نوژین</h2>
+        <p class="ssub">نظر شما برای ما ارزشمند است</p>
+      </div>
+      <div class="review-form-wrap fade" style="max-width:560px;margin:28px auto 40px;background:white;border-radius:20px;padding:24px 28px;box-shadow:var(--shsm);border:1.5px solid var(--g2);">
+        <h3 style="font-size:.95rem;font-weight:800;color:var(--blue);margin-bottom:16px;">✍️ نظر خود را ثبت کنید</h3>
+        <div class="fr">
+          <div class="fg"><label>نام شما</label><input class="fc" id="rvName" placeholder="نام و نام خانوادگی"></div>
+          <div class="fg">
+            <label>امتیاز</label>
+            <div id="rvStarWrap" style="display:flex;gap:4px;padding:10px 0;font-size:1.5rem;cursor:pointer;direction:ltr;justify-content:flex-end;">
+              <span class="rv-star" data-v="1">☆</span>
+              <span class="rv-star" data-v="2">☆</span>
+              <span class="rv-star" data-v="3">☆</span>
+              <span class="rv-star" data-v="4">☆</span>
+              <span class="rv-star" data-v="5">☆</span>
+            </div>
+          </div>
+        </div>
+        <div class="fg"><label>کلاس / خدمت مورد نظر</label><select class="fc" id="rvClass"><option value="">انتخاب کنید (اختیاری)</option></select></div>
+        <div class="fg"><label>نظر شما</label><textarea class="fc" id="rvText" rows="3" placeholder="تجربه فرزندتان را با ما به اشتراک بگذارید..."></textarea></div>
+        <button class="btn-next" style="margin-top:8px" onclick="submitReview()">💬 ثبت نظر</button>
+        <div id="rvStatus" style="font-size:.78rem;text-align:center;margin-top:8px;min-height:18px;"></div>
+      </div>
+      <div id="reviewsList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;max-width:1000px;margin:0 auto;padding:0 6%;"></div>
     </div>
   </section>
 </div>
@@ -817,6 +900,8 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
       <button class="atab" onclick="switchTab('tab-contact')">📞 تماس</button>
       <button class="atab" onclick="switchTab('tab-gallery')">📸 گالری</button>
       <button class="atab" onclick="switchTab('tab-stats')">📊 آمار</button>
+      <button class="atab" onclick="switchTab('tab-reviews')">💬 نظرات</button>
+      <button class="atab" onclick="switchTab('tab-msgs')">📨 پیام‌ها</button>
     </div>
 
     <!-- TAB: SITE -->
@@ -1061,6 +1146,29 @@ footer{background:var(--blue);color:var(--white);padding:52px 6% 26px;}
       </div>
     </div>
 
+    <!-- TAB: REVIEWS -->
+    <div class="atab-content" id="tab-reviews" style="display:none">
+      <div class="asec">
+        <h3>💬 مدیریت نظرات</h3>
+        <p style="font-size:.76rem;color:var(--g4);margin-bottom:14px;line-height:1.7">نظرات تایید نشده را بررسی و پاسخ دهید. فقط نظرات تایید‌شده در سایت نمایش داده می‌شوند.</p>
+        <div class="reg-tabs" style="margin-bottom:16px;">
+          <button class="reg-tab active" onclick="switchReviewTab('pending',this)">⏳ در انتظار <span id="rvPendingCount" class="reg-count"></span></button>
+          <button class="reg-tab" onclick="switchReviewTab('approved',this)">✅ تایید‌شده <span id="rvApprovedCount" class="reg-count confirmed"></span></button>
+          <button class="reg-tab" onclick="switchReviewTab('all',this)">📋 همه</button>
+        </div>
+        <div id="adminReviewsList"></div>
+      </div>
+    </div>
+
+    <!-- TAB: MESSAGES -->
+    <div class="atab-content" id="tab-msgs" style="display:none">
+      <div class="asec">
+        <h3>📨 پیام‌های دریافتی</h3>
+        <p style="font-size:.76rem;color:var(--g4);margin-bottom:14px;">پیام‌های ارسال‌شده از فرم تماس</p>
+        <div id="adminMsgsList"></div>
+      </div>
+    </div>
+
     <button class="admin-save" onclick="saveAdmin()">💾 ذخیره همه تغییرات</button>
   </div>
 </div>
@@ -1145,7 +1253,8 @@ const S = {
       caps:this.caps, phones:this.phones, addr:this.addr, classOverrides:this.classOverrides,
       adminPass:(typeof ADMIN_PASS_VAR!=='undefined'?ADMIN_PASS_VAR:undefined),
       deletedBaseClasses:this.deletedBaseClasses||[],
-      customTabs:this.customTabs||[]
+      customTabs:this.customTabs||[],
+      _tabsSavedToServer:true
       // NOTE: gallery NOT included here — saved separately per-image
     };
     // Firebase save (primary)
@@ -1205,11 +1314,12 @@ const S = {
     if(data.classOverrides) Object.assign(this.classOverrides, data.classOverrides);
     if(Array.isArray(data.deletedBaseClasses)) this.deletedBaseClasses=data.deletedBaseClasses;
     if(Array.isArray(data.gallery)) this.gallery=data.gallery;
-    if(Array.isArray(data.customTabs) && data.customTabs.length>0) this.customTabs=data.customTabs;
-    else if(Array.isArray(data.customTabs) && data.customTabs.length===0){
-      // Firebase returned empty array — keep default tabs (workshops)
-      // only clear if we explicitly had tabs saved before
-      if(this.customTabs && this.customTabs.length===0) this.customTabs=data.customTabs;
+    if(Array.isArray(data.customTabs)){
+      // همیشه مقدار Firebase رو اعمال کن — اگه خالیه یعنی ادمین همه تب‌ها رو حذف کرده
+      // استثناء: اگه data از localStorage اومده و خالیه، default رو نگه‌دار
+      if(data.customTabs.length>0 || data._tabsSavedToServer){
+        this.customTabs=data.customTabs;
+      }
     }
     if(data.adminPass && typeof ADMIN_PASS_VAR!=='undefined') { try{ ADMIN_PASS_VAR=data.adminPass; }catch(e){} }
   }
@@ -1262,7 +1372,7 @@ function getCD(){const _del=S.deletedBaseClasses||[];return[
     // merge classOverrides for all classes
     const ov=S.classOverrides[c.id];
     if(ov){
-      if(ov.tabId!==undefined&&c.tabId===undefined) c.tabId=ov.tabId;
+      if(ov.tabId!==undefined) c.tabId=ov.tabId;
       if(ov.day) c.d=ov.day;
       if(ov.name) c.n=ov.name;
       if(ov.emoji) c.e=ov.emoji;
@@ -1877,6 +1987,8 @@ function switchTab(id){
   if(id==='tab-gallery') buildGalAdminGrid();
   if(id==='tab-prices') _loadPriceFields();
   if(id==='tab-tabs'){ buildTabsList(); buildClassTabAssignList(); }
+  if(id==='tab-reviews'){ renderAdminReviews(); }
+  if(id==='tab-msgs'){ renderAdminMsgs(); }
 }
 
 function _openAdminPanel(){
@@ -2682,6 +2794,7 @@ const io=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersect
 function obs(){document.querySelectorAll('.fade:not(.in)').forEach(el=>io.observe(el));}
 
 renderClasses();renderDetails();updateHourlyDisp();renderCustomTabs();obs();
+try{ initReviewStars(); populateRvClassSelect(); renderReviewsList(); }catch(e){}
 
 try{
   S.load(); // immediate load from localStorage (fallback)
@@ -2744,11 +2857,278 @@ function _applyFirebaseData(){
         if(typeof renderRegContent==='function') renderRegContent();
       }
     });
+    // Load reviews
+    if(window._FB.loadReviews){
+      window._FB.loadReviews().then(rvs=>{
+        if(rvs && rvs.length>0){
+          reviews.length=0;
+          rvs.forEach(r=>reviews.push(r));
+          reviews.sort((a,b)=>(b.ts||0)-(a.ts||0));
+        }
+        if(typeof renderReviewsList==='function') renderReviewsList();
+        if(typeof renderAdminReviews==='function') renderAdminReviews();
+      });
+    }
+    // Load contact messages
+    if(window._FB.loadMessages){
+      window._FB.loadMessages().then(msgs=>{
+        if(msgs && msgs.length>0){
+          contactMessages.length=0;
+          msgs.forEach(m=>contactMessages.push(m));
+          contactMessages.sort((a,b)=>(b.ts||0)-(a.ts||0));
+        }
+        if(typeof renderAdminMsgs==='function') renderAdminMsgs();
+      });
+    }
   }
 }
 if(window._fbReady){ _applyFirebaseData(); }
 else { document.addEventListener('fbReady', _applyFirebaseData, {once:true}); }
 
+
+
+// ===== REVIEWS SYSTEM =====
+const reviews = [];
+let rvSelectedStar = 0;
+let _rvTab = 'pending';
+
+// Star rating interaction
+document.addEventListener('DOMContentLoaded', function(){
+  initReviewStars();
+  populateRvClassSelect();
+});
+function initReviewStars(){
+  const wrap = document.getElementById('rvStarWrap');
+  if(!wrap) return;
+  wrap.querySelectorAll('.rv-star').forEach(star => {
+    star.addEventListener('mouseover', function(){
+      const v = +this.dataset.v;
+      wrap.querySelectorAll('.rv-star').forEach(s => {
+        s.textContent = +s.dataset.v <= v ? '★' : '☆';
+        s.style.color = +s.dataset.v <= v ? '#f5a623' : '#ccc';
+      });
+    });
+    star.addEventListener('mouseout', function(){
+      wrap.querySelectorAll('.rv-star').forEach(s => {
+        s.textContent = +s.dataset.v <= rvSelectedStar ? '★' : '☆';
+        s.style.color = +s.dataset.v <= rvSelectedStar ? '#f5a623' : '#ccc';
+      });
+    });
+    star.addEventListener('click', function(){
+      rvSelectedStar = +this.dataset.v;
+      wrap.querySelectorAll('.rv-star').forEach(s => {
+        s.textContent = +s.dataset.v <= rvSelectedStar ? '★' : '☆';
+        s.style.color = +s.dataset.v <= rvSelectedStar ? '#f5a623' : '#ccc';
+      });
+    });
+  });
+}
+function populateRvClassSelect(){
+  const sel = document.getElementById('rvClass');
+  if(!sel) return;
+  const classes = getCD();
+  sel.innerHTML = '<option value="">انتخاب کنید (اختیاری)</option>' +
+    classes.map(c => `<option value="${c.n}">${c.e} ${c.n}</option>`).join('') +
+    '<option value="نگهداری ساعتی">👶 نگهداری ساعتی</option>' +
+    '<option value="سالن تولد">🎂 سالن تولد</option>';
+}
+
+async function submitReview(){
+  const name = (document.getElementById('rvName').value||'').trim();
+  const text = (document.getElementById('rvText').value||'').trim();
+  const cls  = (document.getElementById('rvClass').value||'').trim();
+  const st   = document.getElementById('rvStatus');
+  if(!name){ showToast('⚠️ لطفاً نامتان را وارد کنید'); return; }
+  if(!text){ showToast('⚠️ لطفاً نظرتان را بنویسید'); return; }
+  if(rvSelectedStar===0){ showToast('⚠️ لطفاً امتیاز را انتخاب کنید'); return; }
+  st.textContent = '⏳ در حال ارسال...';
+  st.style.color = 'var(--g4)';
+  const review = {
+    id: 'rv-'+Date.now(),
+    name, text, cls,
+    stars: rvSelectedStar,
+    approved: false,
+    reply: '',
+    ts: Date.now()
+  };
+  reviews.unshift(review);
+  let saved = false;
+  if(window._FB && window._FB.saveReview){
+    saved = await window._FB.saveReview(review);
+  }
+  st.textContent = '✅ نظر شما دریافت شد و پس از تأیید نمایش داده می‌شود';
+  st.style.color = '#1a8c6e';
+  document.getElementById('rvName').value = '';
+  document.getElementById('rvText').value = '';
+  document.getElementById('rvClass').value = '';
+  rvSelectedStar = 0;
+  const wrap = document.getElementById('rvStarWrap');
+  if(wrap) wrap.querySelectorAll('.rv-star').forEach(s => { s.textContent='☆'; s.style.color=''; });
+  setTimeout(()=>{ st.textContent=''; }, 5000);
+}
+
+function renderReviewsList(){
+  const el = document.getElementById('reviewsList');
+  if(!el) return;
+  const approved = reviews.filter(r => r.approved);
+  if(approved.length === 0){
+    el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--g4);font-size:.88rem;">هنوز نظری تایید نشده است</div>';
+    return;
+  }
+  el.innerHTML = approved.map(r => {
+    const stars = '★'.repeat(r.stars||5) + '☆'.repeat(5-(r.stars||5));
+    const date = r.ts ? new Date(r.ts).toLocaleDateString('fa-IR') : '';
+    return `<div class="review-card fade in">
+      <div class="rv-header">
+        <span class="rv-name">👤 ${r.name}</span>
+        <span class="rv-stars">${stars}</span>
+      </div>
+      ${r.cls?`<span class="rv-class-tag">${r.cls}</span>`:''}
+      <p class="rv-text">${r.text.replace(/</g,'&lt;')}</p>
+      ${r.reply?`<div class="rv-reply"><strong>💬 پاسخ خانه بازی نوژین:</strong>${r.reply.replace(/</g,'&lt;')}</div>`:''}
+      <div style="font-size:.7rem;color:var(--g4);margin-top:6px;text-align:left">${date}</div>
+    </div>`;
+  }).join('');
+}
+
+// ===== ADMIN REVIEWS =====
+function switchReviewTab(tab, btn){
+  _rvTab = tab;
+  document.querySelectorAll('#tab-reviews .reg-tab').forEach(b => b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderAdminReviews();
+}
+
+function renderAdminReviews(){
+  const wrap = document.getElementById('adminReviewsList');
+  if(!wrap) return;
+  let list = reviews.slice();
+  if(_rvTab==='pending') list = list.filter(r=>!r.approved);
+  else if(_rvTab==='approved') list = list.filter(r=>r.approved);
+  
+  const pendEl = document.getElementById('rvPendingCount');
+  const appEl = document.getElementById('rvApprovedCount');
+  const pending = reviews.filter(r=>!r.approved).length;
+  const approved = reviews.filter(r=>r.approved).length;
+  if(pendEl){ pendEl.textContent = pending>0?pending:''; }
+  if(appEl){ appEl.textContent = approved>0?approved:''; }
+
+  if(list.length===0){
+    wrap.innerHTML='<div style="text-align:center;padding:30px;color:var(--g4);font-size:.85rem;">موردی یافت نشد</div>';
+    return;
+  }
+  wrap.innerHTML = list.map(r => {
+    const stars = '★'.repeat(r.stars||5)+'☆'.repeat(5-(r.stars||5));
+    const date = r.ts ? new Date(r.ts).toLocaleDateString('fa-IR') : '';
+    return `<div class="rv-admin-card">
+      <div class="rv-meta">${date} — ${r.name} — <span style="color:#f5a623">${stars}</span> ${r.cls?'— '+r.cls:''}</div>
+      <div style="font-size:.85rem;color:var(--g8);line-height:1.8;">${r.text.replace(/</g,'&lt;')}</div>
+      ${r.reply?`<div class="rv-reply" style="margin-top:8px"><strong>💬 پاسخ فعلی:</strong>${r.reply.replace(/</g,'&lt;')}</div>`:''}
+      <textarea id="rv-reply-${r.id}" placeholder="پاسخ ادمین (اختیاری)...">${r.reply||''}</textarea>
+      <div class="rv-action-row">
+        ${!r.approved?`<button class="rv-approve-btn" onclick="approveReview('${r.id}')">✅ تایید و انتشار</button>`:''}
+        ${r.approved?`<button class="rv-approve-btn" style="background:var(--g4)" onclick="unapproveReview('${r.id}')">↩️ رد تایید</button>`:''}
+        <button class="rv-reply-btn" onclick="saveReviewReply('${r.id}')">💬 ذخیره پاسخ</button>
+        <button class="rv-del-btn" onclick="deleteReviewAdmin('${r.id}')">🗑 حذف</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function approveReview(id){
+  const rv = reviews.find(r=>r.id===id);
+  if(!rv) return;
+  const replyEl = document.getElementById('rv-reply-'+id);
+  if(replyEl && replyEl.value.trim()) rv.reply = replyEl.value.trim();
+  rv.approved = true;
+  if(window._FB && window._FB.updateReview) await window._FB.updateReview(id, {approved:true, reply:rv.reply||''});
+  renderAdminReviews();
+  renderReviewsList();
+  showToast('✅ نظر تایید و منتشر شد');
+}
+async function unapproveReview(id){
+  const rv = reviews.find(r=>r.id===id);
+  if(!rv) return;
+  rv.approved = false;
+  if(window._FB && window._FB.updateReview) await window._FB.updateReview(id, {approved:false});
+  renderAdminReviews();
+  renderReviewsList();
+  showToast('↩️ نظر از انتشار خارج شد');
+}
+async function saveReviewReply(id){
+  const rv = reviews.find(r=>r.id===id);
+  if(!rv) return;
+  const replyEl = document.getElementById('rv-reply-'+id);
+  if(!replyEl) return;
+  rv.reply = replyEl.value.trim();
+  if(window._FB && window._FB.updateReview) await window._FB.updateReview(id, {reply:rv.reply});
+  renderAdminReviews();
+  renderReviewsList();
+  showToast('✅ پاسخ ذخیره شد');
+}
+async function deleteReviewAdmin(id){
+  if(!confirm('آیا می‌خواهید این نظر را حذف کنید؟')) return;
+  const idx = reviews.findIndex(r=>r.id===id);
+  if(idx===-1) return;
+  reviews.splice(idx,1);
+  if(window._FB && window._FB.deleteReview) await window._FB.deleteReview(id);
+  renderAdminReviews();
+  renderReviewsList();
+  showToast('🗑 نظر حذف شد');
+}
+
+// ===== CONTACT FORM SUBMISSION =====
+const contactMessages = [];
+async function submitContactForm(){
+  const name = (document.getElementById('cformName').value||'').trim();
+  const phone = (document.getElementById('cformPhone').value||'').trim();
+  const subject = (document.getElementById('cformSubject').value||'').trim();
+  const msg = (document.getElementById('cformMsg').value||'').trim();
+  const st = document.getElementById('cformStatus');
+  if(!name||!phone||!msg){ showToast('⚠️ نام، شماره و پیام الزامی است'); return; }
+  st.textContent='⏳ در حال ارسال...';
+  st.style.color='var(--g4)';
+  const msgObj = { id:'msg-'+Date.now(), name, phone, subject, msg, ts:Date.now(), read:false };
+  contactMessages.unshift(msgObj);
+  if(window._FB && window._FB.saveContactMessage) await window._FB.saveContactMessage(msgObj);
+  st.textContent='✅ پیام شما ارسال شد — به زودی با شما تماس می‌گیریم';
+  st.style.color='#1a8c6e';
+  document.getElementById('cformName').value='';
+  document.getElementById('cformPhone').value='';
+  document.getElementById('cformMsg').value='';
+  setTimeout(()=>{ st.textContent=''; }, 6000);
+}
+
+function renderAdminMsgs(){
+  const wrap = document.getElementById('adminMsgsList');
+  if(!wrap) return;
+  if(contactMessages.length===0){
+    wrap.innerHTML='<div style="text-align:center;padding:30px;color:var(--g4);font-size:.85rem;">هیچ پیامی دریافت نشده است</div>';
+    return;
+  }
+  wrap.innerHTML = contactMessages.map(m => {
+    const date = m.ts ? new Date(m.ts).toLocaleDateString('fa-IR') : '';
+    return `<div class="msg-card">
+      <div class="msg-head">
+        <span class="msg-name">👤 ${m.name}</span>
+        <span class="msg-subj">${m.subject||'پیام'}</span>
+      </div>
+      <div class="msg-body">${m.msg.replace(/</g,'&lt;')}</div>
+      <div class="msg-phone">📞 ${m.phone} &nbsp;—&nbsp; ${date}</div>
+      <div style="margin-top:8px;text-align:left">
+        <button class="rv-del-btn" onclick="deleteMsgAdmin('${m.id}')">🗑 حذف</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+async function deleteMsgAdmin(id){
+  const idx = contactMessages.findIndex(m=>m.id===id);
+  if(idx===-1) return;
+  contactMessages.splice(idx,1);
+  if(window._FB && window._FB.deleteMessage) await window._FB.deleteMessage(id);
+  renderAdminMsgs();
+  showToast('🗑 پیام حذف شد');
+}
 
 // Auto-save disabled — explicit save buttons used instead
 
